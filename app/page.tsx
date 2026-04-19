@@ -1,35 +1,290 @@
 "use client";
-import { useState } from "react";
+
+import { useRef, useState } from "react";
+
+type ProcessStep =
+  | "idle"
+  | "uploading"
+  | "analyzing"
+  | "restoring"
+  | "finalizing"
+  | "done"
+  | "error";
 
 export default function Home() {
-  const [image, setImage] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [slider, setSlider] = useState(50);
+  const [step, setStep] = useState<ProcessStep>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleUpload = (e) => {
-    const file = e.target.files[0];
+  function getStepText(currentStep: ProcessStep) {
+    switch (currentStep) {
+      case "uploading":
+        return "Nahráváme fotografii...";
+      case "analyzing":
+        return "Analyzujeme poškození...";
+      case "restoring":
+        return "Provádíme opravu fotografie...";
+      case "finalizing":
+        return "Dokončujeme výsledek...";
+      case "done":
+        return "Hotovo";
+      case "error":
+        return "Došlo k chybě";
+      default:
+        return "";
+    }
+  }
+
+  function getStepProgress(currentStep: ProcessStep) {
+    switch (currentStep) {
+      case "uploading":
+        return 20;
+      case "analyzing":
+        return 45;
+      case "restoring":
+        return 75;
+      case "finalizing":
+        return 95;
+      case "done":
+        return 100;
+      default:
+        return 0;
+    }
+  }
+
+  async function handleUpload() {
     if (!file) return;
-    setImage(URL.createObjectURL(file));
-  };
+
+    try {
+      setLoading(true);
+      setErrorMessage(null);
+      setOriginalUrl(null);
+      setResultUrl(null);
+      setSlider(50);
+
+      setStep("uploading");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const uploadRes = await fetch("http://127.0.0.1:8000/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error(`Upload failed: ${uploadRes.status}`);
+      }
+
+      setStep("analyzing");
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      const uploadData = await uploadRes.json();
+
+      const statusRes = await fetch(
+        `http://127.0.0.1:8000/status/${uploadData.job_id}`
+      );
+
+      if (!statusRes.ok) {
+        throw new Error(`Status failed: ${statusRes.status}`);
+      }
+
+      setStep("restoring");
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const statusData = await statusRes.json();
+
+      if (statusData.original) {
+        setOriginalUrl(`http://127.0.0.1:8000${statusData.original}`);
+      }
+
+      if (statusData.result) {
+        setResultUrl(`http://127.0.0.1:8000${statusData.result}`);
+      }
+
+      setStep("finalizing");
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      setStep("done");
+    } catch (error) {
+      console.error("Upload error:", error);
+      setStep("error");
+      setErrorMessage("Nepodařilo se zpracovat fotografii. Zkus to prosím znovu.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    const droppedFile = e.dataTransfer.files?.[0] || null;
+    if (droppedFile) {
+      setFile(droppedFile);
+      setErrorMessage(null);
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+  }
 
   return (
-    <main className="min-h-screen bg-[#F8F9FB] flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-semibold mb-4">opravfotku.cz</h1>
-      <p className="text-gray-500 mb-8 text-center">
-        Oprav staré nebo poškozené fotky pomocí AI
-      </p>
+    <main className="min-h-screen bg-neutral-50 text-neutral-900">
+      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-4 py-10">
+        <div className="mx-auto w-full max-w-3xl text-center">
+          <div className="mb-4 inline-flex rounded-full border border-neutral-200 bg-white px-4 py-1 text-sm text-neutral-600">
+            AI oprava starých a poškozených fotografií
+          </div>
 
-      <label className="cursor-pointer">
-        <div className="bg-black text-white px-8 py-4 rounded-2xl mb-6">
-          📤 Nahrát fotografii
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            opravfotku.cz
+          </h1>
+
+          <p className="mx-auto mt-4 max-w-2xl text-base text-neutral-600 sm:text-lg">
+            Obarvení černobílých fotografií, oprava škrábanců a poškození,
+            zlepšení ostrosti a kvality. Jednoduše nahraj fotku a nech ji opravit.
+          </p>
         </div>
-        <input type="file" className="hidden" onChange={handleUpload} />
-      </label>
 
-      {image && (
-        <img
-          src={image}
-          className="w-[300px] h-[200px] object-cover rounded-xl"
-        />
-      )}
+        <div className="mx-auto mt-10 w-full max-w-3xl rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onClick={() => inputRef.current?.click()}
+            className="cursor-pointer rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-10 text-center transition hover:border-neutral-500 hover:bg-neutral-100"
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const selectedFile = e.target.files?.[0] || null;
+                setFile(selectedFile);
+                setErrorMessage(null);
+              }}
+              className="hidden"
+            />
+
+            <div className="text-5xl">📷</div>
+            <h2 className="mt-4 text-xl font-semibold">Nahraj fotografii</h2>
+            <p className="mt-2 text-neutral-600">
+              Klikni sem nebo přetáhni soubor myší
+            </p>
+            <p className="mt-2 text-sm text-neutral-400">JPG, PNG, WEBP</p>
+          </div>
+
+          <div className="mt-5 text-center text-sm text-neutral-500">
+            {file ? `Vybraný soubor: ${file.name}` : "Zatím není vybraná žádná fotka"}
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={handleUpload}
+              disabled={!file || loading}
+              className={`rounded-2xl px-6 py-3 text-sm font-medium text-white transition ${
+                !file || loading
+                  ? "cursor-not-allowed bg-neutral-400"
+                  : "bg-black hover:bg-neutral-800"
+              }`}
+            >
+              {loading ? "Probíhá oprava..." : "Nahrát a opravit"}
+            </button>
+          </div>
+
+          {(loading || step === "done" || step === "error") && (
+            <div className="mt-6">
+              <div className="mb-2 flex items-center justify-between text-sm text-neutral-600">
+                <span>{getStepText(step)}</span>
+                <span>{getStepProgress(step)}%</span>
+              </div>
+
+              <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-200">
+                <div
+                  className="h-full rounded-full bg-black transition-all duration-300"
+                  style={{ width: `${getStepProgress(step)}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          )}
+        </div>
+
+        {originalUrl && resultUrl && (
+          <div className="mx-auto mt-10 w-full max-w-5xl rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <h3 className="text-lg font-semibold">Porovnání před a po</h3>
+              <a
+                href={resultUrl}
+                download
+                className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800"
+              >
+                Stáhnout výsledek
+              </a>
+            </div>
+
+            <div className="relative overflow-hidden rounded-2xl">
+              <img
+                src={originalUrl}
+                alt="Původní fotografie"
+                className="block w-full object-contain"
+              />
+
+              <div
+                className="absolute inset-y-0 left-0 overflow-hidden"
+                style={{ width: `${slider}%` }}
+              >
+                <img
+                  src={resultUrl}
+                  alt="Opravená fotografie"
+                  className="block h-full w-full object-cover"
+                  style={{ width: "100%", minWidth: "100%" }}
+                />
+              </div>
+
+              <div
+                className="absolute top-0 bottom-0 w-1 bg-white shadow"
+                style={{ left: `${slider}%`, transform: "translateX(-50%)" }}
+              >
+                <div className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white text-sm shadow">
+                  ↔
+                </div>
+              </div>
+
+              <div className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
+                Po
+              </div>
+
+              <div className="absolute right-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
+                Před
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={slider}
+                onChange={(e) => setSlider(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          </div>
+        )}
+      </section>
     </main>
   );
 }
