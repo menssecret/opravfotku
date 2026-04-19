@@ -93,6 +93,12 @@ export default function Home() {
     if (!file) return;
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+      if (!apiUrl) {
+        throw new Error("Chybí NEXT_PUBLIC_API_URL");
+      }
+
       setLoading(true);
       setErrorMessage(null);
       setOriginalUrl(null);
@@ -107,7 +113,7 @@ export default function Home() {
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const uploadRes = await fetch("http://localhost:8000/upload", {
+      const uploadRes = await fetch(`${apiUrl}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -121,9 +127,7 @@ export default function Home() {
 
       const uploadData = await uploadRes.json();
 
-      const statusRes = await fetch(
-        `http://localhost:8000/status/${uploadData.job_id}`
-      );
+      const statusRes = await fetch(`${apiUrl}/status/${uploadData.job_id}`);
 
       if (!statusRes.ok) {
         throw new Error(`Status failed: ${statusRes.status}`);
@@ -139,11 +143,11 @@ export default function Home() {
       }
 
       if (statusData.original) {
-        setOriginalUrl(`http://localhost:8000${statusData.original}`);
+        setOriginalUrl(`${apiUrl}${statusData.original}`);
       }
 
       if (statusData.result) {
-        setResultUrl(`http://localhost:8000${statusData.result}`);
+        setResultUrl(`${apiUrl}${statusData.result}`);
       }
 
       setStep("finalizing");
