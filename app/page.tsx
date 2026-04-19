@@ -11,8 +11,38 @@ type ProcessStep =
   | "done"
   | "error";
 
+type Mode = "auto" | "restore" | "colorize" | "upscale";
+
+const MODE_OPTIONS: {
+  id: Mode;
+  title: string;
+  description: string;
+}[] = [
+  {
+    id: "auto",
+    title: "Automatická oprava",
+    description: "AI sama vybere nejlepší kombinaci oprav pro fotografii.",
+  },
+  {
+    id: "restore",
+    title: "Opravit poškození",
+    description: "Zaměřeno na škrábance, fleky, prach a drobná poškození.",
+  },
+  {
+    id: "colorize",
+    title: "Obarvit černobílou",
+    description: "Přidá přirozenější barvy starým černobílým fotografiím.",
+  },
+  {
+    id: "upscale",
+    title: "Zvýšit kvalitu",
+    description: "Zlepší ostrost a připraví fotku pro větší zobrazení.",
+  },
+];
+
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
+  const [mode, setMode] = useState<Mode>("auto");
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,9 +56,9 @@ export default function Home() {
       case "uploading":
         return "Nahráváme fotografii...";
       case "analyzing":
-        return "Analyzujeme poškození...";
+        return "Analyzujeme fotografii...";
       case "restoring":
-        return "Provádíme opravu fotografie...";
+        return "AI upravuje výsledek...";
       case "finalizing":
         return "Dokončujeme výsledek...";
       case "done":
@@ -52,6 +82,8 @@ export default function Home() {
         return 95;
       case "done":
         return 100;
+      case "error":
+        return 100;
       default:
         return 0;
     }
@@ -71,10 +103,11 @@ export default function Home() {
 
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("mode", mode);
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const uploadRes = await fetch("http://127.0.0.1:8000/upload", {
+      const uploadRes = await fetch("http://localhost:8000/upload", {
         method: "POST",
         body: formData,
       });
@@ -89,7 +122,7 @@ export default function Home() {
       const uploadData = await uploadRes.json();
 
       const statusRes = await fetch(
-        `http://127.0.0.1:8000/status/${uploadData.job_id}`
+        `http://localhost:8000/status/${uploadData.job_id}`
       );
 
       if (!statusRes.ok) {
@@ -101,12 +134,16 @@ export default function Home() {
 
       const statusData = await statusRes.json();
 
+      if (statusData.status === "error") {
+        throw new Error(statusData.error || "AI processing failed");
+      }
+
       if (statusData.original) {
-        setOriginalUrl(`http://127.0.0.1:8000${statusData.original}`);
+        setOriginalUrl(`http://localhost:8000${statusData.original}`);
       }
 
       if (statusData.result) {
-        setResultUrl(`http://127.0.0.1:8000${statusData.result}`);
+        setResultUrl(`http://localhost:8000${statusData.result}`);
       }
 
       setStep("finalizing");
@@ -134,6 +171,8 @@ export default function Home() {
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
   }
+
+  const selectedMode = MODE_OPTIONS.find((item) => item.id === mode);
 
   return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900">
@@ -182,6 +221,45 @@ export default function Home() {
 
           <div className="mt-5 text-center text-sm text-neutral-500">
             {file ? `Vybraný soubor: ${file.name}` : "Zatím není vybraná žádná fotka"}
+          </div>
+
+          <div className="mt-8">
+            <h3 className="mb-3 text-left text-sm font-medium text-neutral-700">
+              Vyber režim opravy
+            </h3>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {MODE_OPTIONS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setMode(item.id)}
+                  className={`rounded-2xl border p-4 text-left transition ${
+                    mode === item.id
+                      ? "border-black bg-black text-white"
+                      : "border-neutral-300 bg-white text-neutral-800 hover:border-neutral-500"
+                  }`}
+                >
+                  <div className="text-sm font-semibold">{item.title}</div>
+                  <div
+                    className={`mt-1 text-sm ${
+                      mode === item.id ? "text-neutral-200" : "text-neutral-500"
+                    }`}
+                  >
+                    {item.description}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {selectedMode && (
+              <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+                Vybraný režim:{" "}
+                <span className="font-semibold text-neutral-900">
+                  {selectedMode.title}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-6 flex justify-center">

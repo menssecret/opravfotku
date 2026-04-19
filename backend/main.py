@@ -1,12 +1,18 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from PIL import Image, ImageEnhance, ImageFilter
+from dotenv import load_dotenv
 import uuid
 import os
 
+from providers.factory import get_ai_provider
+
+# Načtení .env
+load_dotenv()
+
 app = FastAPI()
 
+# CORS (pro frontend)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -20,39 +26,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Složky pro soubory
 UPLOAD_DIR = "uploads"
 RESULT_DIR = "results"
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(RESULT_DIR, exist_ok=True)
 
+# Statické cesty
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.mount("/results", StaticFiles(directory=RESULT_DIR), name="results")
 
+# In-memory job storage
 jobs = {}
 
-def simulate_restore(input_path: str, output_path: str):
-    image = Image.open(input_path).convert("RGB")
+# AI provider
+provider = get_ai_provider()
 
-    image = image.filter(ImageFilter.SHARPEN)
-
-    contrast = ImageEnhance.Contrast(image)
-    image = contrast.enhance(1.12)
-
-    brightness = ImageEnhance.Brightness(image)
-    image = brightness.enhance(1.04)
-
-    color = ImageEnhance.Color(image)
-    image = color.enhance(1.08)
-
-    image.save(output_path, quality=95)
 
 @app.get("/")
 def root():
     return {"status": "ok"}
 
+
 @app.post("/upload")
-async def upload(file: UploadFile = File(...)):
+async def upload(
+    file: UploadFile = File(...),
+    mode: str = Form("auto")
+):
     job_id = str(uuid.uuid4())
     safe_name = file.filename.replace(" ", "_")
     filename = f"{job_id}_{safe_name}"
@@ -65,15 +66,32 @@ async def upload(file: UploadFile = File(...)):
     with open(upload_path, "wb") as f:
         f.write(content)
 
-    simulate_restore(upload_path, result_path)
+    try:
+        print("UPLOAD START:", mode)
+        print("PROVIDER:", type(provider).__name__)
+
+        provider.process(mode, upload_path, result_path)
+
+    except Exception as e:
+        print("UPLOAD ERROR:", str(e))
+
+        jobs[job_id] = {
+            "status": "error",
+            "mode": mode,
+            "error": str(e),
+        }
+
+        return {"job_id": job_id}
 
     jobs[job_id] = {
         "status": "done",
+        "mode": mode,
         "original": f"/uploads/{filename}",
         "result": f"/results/{filename}"
     }
 
     return {"job_id": job_id}
+
 
 @app.get("/status/{job_id}")
 def status(job_id: str):
