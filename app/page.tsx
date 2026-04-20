@@ -21,22 +21,41 @@ const MODE_OPTIONS: {
   {
     id: "auto",
     title: "Automatická oprava",
-    description: "AI sama vybere nejlepší kombinaci oprav pro fotografii.",
+    description: "AI zvolí nejlepší kombinaci úprav podle nahrané fotografie.",
   },
   {
     id: "restore",
     title: "Opravit poškození",
-    description: "Zaměřeno na škrábance, fleky, prach a drobná poškození.",
+    description: "Odstranění škrábanců, prachu, fleků a drobných poškození.",
   },
   {
     id: "colorize",
     title: "Obarvit černobílou",
-    description: "Přidá přirozenější barvy starým černobílým fotografiím.",
+    description: "Doplnění přirozenějších barev u starých černobílých fotografií.",
   },
   {
     id: "upscale",
     title: "Zvýšit kvalitu",
-    description: "Zlepší ostrost a připraví fotku pro větší zobrazení.",
+    description: "Zlepšení ostrosti a příprava fotografie pro větší zobrazení.",
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    question: "Jaké formáty fotografií podporujete?",
+    answer: "Momentálně podporujeme JPG, PNG a WEBP.",
+  },
+  {
+    question: "Musím se registrovat?",
+    answer: "Ne. Stránka je navržená tak, aby bylo použití co nejjednodušší.",
+  },
+  {
+    question: "Jak dlouho oprava trvá?",
+    answer: "Obvykle jen krátkou chvíli. Doba závisí na velikosti fotografie a zvoleném režimu.",
+  },
+  {
+    question: "Funguje stránka i na mobilu?",
+    answer: "Ano. opravfotku.cz je navržená pro desktop i mobilní použití.",
   },
 ];
 
@@ -104,14 +123,13 @@ export default function Home() {
       setOriginalUrl(null);
       setResultUrl(null);
       setSlider(50);
-
       setStep("uploading");
 
       const formData = new FormData();
       formData.append("file", file);
       formData.append("mode", mode);
 
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 250));
 
       const uploadRes = await fetch(`${apiUrl}/upload`, {
         method: "POST",
@@ -123,7 +141,7 @@ export default function Home() {
       }
 
       setStep("analyzing");
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 350));
 
       const uploadData = await uploadRes.json();
 
@@ -134,7 +152,7 @@ export default function Home() {
       }
 
       setStep("restoring");
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 450));
 
       const statusData = await statusRes.json();
 
@@ -151,7 +169,7 @@ export default function Home() {
       }
 
       setStep("finalizing");
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 250));
 
       setStep("done");
     } catch (error) {
@@ -178,140 +196,281 @@ export default function Home() {
 
   const selectedMode = MODE_OPTIONS.find((item) => item.id === mode);
 
-    return (
+  return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-4 py-10">
-        
-        {/* HLAVIČKA */}
-        <div className="mx-auto w-full max-w-3xl text-center">
-          <div className="mb-4 inline-flex rounded-full border border-neutral-200 bg-white px-4 py-1 text-sm text-neutral-600">
-            AI oprava starých a poškozených fotografií
+      <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <header className="mx-auto flex max-w-6xl items-center justify-between py-4">
+          <div className="text-xl font-semibold tracking-tight">opravfotku.cz</div>
+          <div className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-600">
+            Online AI oprava fotografií
           </div>
+        </header>
 
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            opravfotku.cz
-          </h1>
+        <section className="mx-auto mt-10 grid max-w-6xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <div className="mb-4 inline-flex rounded-full border border-neutral-200 bg-white px-4 py-1 text-sm text-neutral-600">
+              Oprava starých, poškozených i černobílých fotografií
+            </div>
 
-          <p className="mx-auto mt-4 max-w-2xl text-base text-neutral-600 sm:text-lg">
-            Obarvení černobílých fotografií, oprava škrábanců a poškození,
-            zlepšení ostrosti a kvality. Jednoduše nahraj fotku a nech ji opravit.
-          </p>
-        </div>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              Opravte staré a poškozené fotografie během chvíle
+            </h1>
 
-        {/* UPLOAD BOX */}
-        <div className="mx-auto mt-10 w-full max-w-3xl rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
-          <div
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onClick={() => inputRef.current?.click()}
-            className="cursor-pointer rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-10 text-center transition hover:border-neutral-500 hover:bg-neutral-100"
-          >
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const selectedFile = e.target.files?.[0] || null;
-                setFile(selectedFile);
-                setErrorMessage(null);
-              }}
-              className="hidden"
-            />
-
-            <div className="text-5xl">📷</div>
-            <h2 className="mt-4 text-xl font-semibold">Nahraj fotografii</h2>
-            <p className="mt-2 text-neutral-600">
-              Klikni sem nebo přetáhni soubor myší
+            <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-600 sm:text-lg">
+              Nahrajte fotografii a nechte AI vylepšit její vzhled. Stránka pomůže s
+              opravou poškození, obarvením černobílých snímků i zvýšením kvality.
             </p>
-            <p className="mt-2 text-sm text-neutral-400">JPG, PNG, WEBP</p>
-            <p className="mt-2 text-xs text-neutral-400">
-              Maximální velikost souboru: 10 MB
-            </p>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <div className="text-sm font-semibold">Jednoduché použití</div>
+                <div className="mt-1 text-sm text-neutral-500">
+                  Nahraj, oprav, stáhni.
+                </div>
+              </div>
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <div className="text-sm font-semibold">Desktop i mobil</div>
+                <div className="mt-1 text-sm text-neutral-500">
+                  Funguje pohodlně i v telefonu.
+                </div>
+              </div>
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                <div className="text-sm font-semibold">Rychlý výsledek</div>
+                <div className="mt-1 text-sm text-neutral-500">
+                  Výsledek uvidíte během krátké chvíle.
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-5 text-center text-sm text-neutral-500">
-            {file ? `Vybraný soubor: ${file.name}` : "Zatím není vybraná žádná fotka"}
-          </div>
-
-          <div className="mt-6 flex justify-center">
-            <button
-              type="button"
-              onClick={handleUpload}
-              disabled={!file || loading}
-              className={`rounded-2xl px-6 py-3 text-sm font-medium text-white transition ${
-                !file || loading
-                  ? "cursor-not-allowed bg-neutral-400"
-                  : "bg-black hover:bg-neutral-800"
-              }`}
+          <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onClick={() => inputRef.current?.click()}
+              className="cursor-pointer rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-10 text-center transition hover:border-neutral-500 hover:bg-neutral-100"
             >
-              {loading ? "Probíhá oprava..." : "Nahrát a opravit"}
-            </button>
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const selectedFile = e.target.files?.[0] || null;
+                  setFile(selectedFile);
+                  setErrorMessage(null);
+                }}
+                className="hidden"
+              />
+
+              <div className="text-5xl">📷</div>
+              <h2 className="mt-4 text-xl font-semibold">Nahraj fotografii</h2>
+              <p className="mt-2 text-neutral-600">
+                Klikni sem nebo přetáhni soubor myší
+              </p>
+              <p className="mt-2 text-sm text-neutral-400">JPG, PNG, WEBP</p>
+              <p className="mt-2 text-xs text-neutral-400">
+                Maximální velikost souboru: 10 MB
+              </p>
+            </div>
+
+            <div className="mt-5 text-center text-sm text-neutral-500">
+              {file ? `Vybraný soubor: ${file.name}` : "Zatím není vybraná žádná fotka"}
+            </div>
+
+            <div className="mt-8">
+              <h3 className="mb-3 text-left text-sm font-medium text-neutral-700">
+                Vyber režim opravy
+              </h3>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {MODE_OPTIONS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setMode(item.id)}
+                    className={`rounded-2xl border p-4 text-left transition ${
+                      mode === item.id
+                        ? "border-black bg-black text-white"
+                        : "border-neutral-300 bg-white text-neutral-800 hover:border-neutral-500"
+                    }`}
+                  >
+                    <div className="text-sm font-semibold">{item.title}</div>
+                    <div
+                      className={`mt-1 text-sm ${
+                        mode === item.id ? "text-neutral-200" : "text-neutral-500"
+                      }`}
+                    >
+                      {item.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {selectedMode && (
+                <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+                  Vybraný režim:{" "}
+                  <span className="font-semibold text-neutral-900">
+                    {selectedMode.title}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={handleUpload}
+                disabled={!file || loading}
+                className={`rounded-2xl px-6 py-3 text-sm font-medium text-white transition ${
+                  !file || loading
+                    ? "cursor-not-allowed bg-neutral-400"
+                    : "bg-black hover:bg-neutral-800"
+                }`}
+              >
+                {loading ? "Probíhá oprava..." : "Nahrát a opravit"}
+              </button>
+            </div>
+
+            {(loading || step === "done" || step === "error") && (
+              <div className="mt-6">
+                <div className="mb-2 flex items-center justify-between text-sm text-neutral-600">
+                  <span>{getStepText(step)}</span>
+                  <span>{getStepProgress(step)}%</span>
+                </div>
+
+                <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-200">
+                  <div
+                    className="h-full rounded-full bg-black transition-all duration-300"
+                    style={{ width: `${getStepProgress(step)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMessage}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="mx-auto mt-20 grid max-w-6xl gap-6 md:grid-cols-3">
+          <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <div className="text-lg font-semibold">1. Nahrajte fotografii</div>
+            <p className="mt-2 text-sm leading-6 text-neutral-600">
+              Vyberte obrázek z počítače nebo mobilu a nahrajte jej přímo do aplikace.
+            </p>
           </div>
 
-          {(loading || step === "done" || step === "error") && (
-            <div className="mt-6">
-              <div className="mb-2 flex items-center justify-between text-sm text-neutral-600">
-                <span>{getStepText(step)}</span>
-                <span>{getStepProgress(step)}%</span>
-              </div>
+          <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <div className="text-lg font-semibold">2. Vyberte typ opravy</div>
+            <p className="mt-2 text-sm leading-6 text-neutral-600">
+              Zvolte automatickou opravu, odstranění poškození, obarvení nebo zvýšení kvality.
+            </p>
+          </div>
 
-              <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-200">
-                <div
-                  className="h-full rounded-full bg-black transition-all duration-300"
-                  style={{ width: `${getStepProgress(step)}%` }}
-                />
-              </div>
-            </div>
-          )}
+          <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <div className="text-lg font-semibold">3. Stáhněte výsledek</div>
+            <p className="mt-2 text-sm leading-6 text-neutral-600">
+              Porovnejte původní a upravenou verzi a uložte si výsledek do zařízení.
+            </p>
+          </div>
+        </section>
 
-          {errorMessage && (
-            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {errorMessage}
-            </div>
-          )}
-        </div>
-
-        {/* VÝSLEDEK */}
         {originalUrl && resultUrl && (
-          <div className="mx-auto mt-10 w-full max-w-5xl rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between gap-4">
+          <section className="mx-auto mt-20 w-full max-w-6xl rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-lg font-semibold">Porovnání před a po</h3>
               <a
                 href={resultUrl}
                 download
-                className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800"
+                className="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-neutral-800"
               >
                 Stáhnout výsledek
               </a>
             </div>
 
             <div className="relative overflow-hidden rounded-2xl">
-              <img src={originalUrl} className="block w-full object-contain" />
+              <img
+                src={originalUrl}
+                alt="Původní fotografie"
+                className="block w-full object-contain"
+              />
 
               <div
                 className="absolute inset-y-0 left-0 overflow-hidden"
                 style={{ width: `${slider}%` }}
               >
-                <img src={resultUrl} className="block h-full w-full object-cover" />
+                <img
+                  src={resultUrl}
+                  alt="Opravená fotografie"
+                  className="block h-full w-full object-cover"
+                  style={{ width: "100%", minWidth: "100%" }}
+                />
+              </div>
+
+              <div
+                className="absolute top-0 bottom-0 w-1 bg-white shadow"
+                style={{ left: `${slider}%`, transform: "translateX(-50%)" }}
+              >
+                <div className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white text-sm shadow">
+                  ↔
+                </div>
+              </div>
+
+              <div className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
+                Po
+              </div>
+
+              <div className="absolute right-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
+                Před
               </div>
             </div>
 
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={slider}
-              onChange={(e) => setSlider(Number(e.target.value))}
-              className="mt-6 w-full"
-            />
-          </div>
+            <div className="mt-6">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={slider}
+                onChange={(e) => setSlider(Number(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          </section>
         )}
 
-        {/* FOOTER */}
-        <footer className="mx-auto mt-12 w-full max-w-5xl text-center text-sm text-neutral-500">
-          opravfotku.cz – jednoduchá AI oprava fotografií online
-        </footer>
+        <section className="mx-auto mt-20 max-w-6xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-3xl font-bold tracking-tight">Časté otázky</h2>
+            <p className="mt-3 text-neutral-600">
+              Vše důležité přehledně na jednom místě.
+            </p>
+          </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
+            {FAQ_ITEMS.map((item) => (
+              <div
+                key={item.question}
+                className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm"
+              >
+                <h3 className="text-base font-semibold">{item.question}</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-600">
+                  {item.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <footer className="mx-auto mt-20 w-full max-w-6xl border-t border-neutral-200 pt-8 text-center text-sm text-neutral-500">
+          <div className="font-medium text-neutral-700">opravfotku.cz</div>
+          <p className="mt-2">
+            Jednoduchá online AI oprava fotografií pro desktop i mobil.
+          </p>
+          <p className="mt-2">© 2026 opravfotku.cz</p>
+        </footer>
       </section>
     </main>
   );
