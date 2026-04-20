@@ -1,12 +1,9 @@
-from PIL import Image, ImageEnhance
+from PIL import Image
 
-def upscale_image(input_path: str, output_path: str):
-    image = Image.open(input_path).convert("RGB")
+def upscale_image(input_path, output_path):
+    image = Image.open(input_path)
 
-    width, height = image.size
-    upscaled = image.resize((width * 2, height * 2), Image.LANCZOS)
+    new_size = (image.width * 2, image.height * 2)
+    image = image.resize(new_size, Image.LANCZOS)
 
-    sharpness = ImageEnhance.Sharpness(upscaled)
-    upscaled = sharpness.enhance(1.2)
-
-    upscaled.save(output_path, quality=95)
+    image.save(output_path)

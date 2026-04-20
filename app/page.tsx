@@ -440,7 +440,60 @@ export default function Home() {
             </div>
           </section>
         )}
+        <section className="mx-auto mt-20 max-w-6xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-3xl font-bold tracking-tight">Ukázky výsledků</h2>
+            <p className="mt-3 text-neutral-600">
+              Příklady oprav starých a poškozených fotografií.
+            </p>
+          </div>
 
+          <div className="grid gap-6 md:grid-cols-3">
+    
+            {/* KARTA 1 */}
+            <div className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm">
+              <div className="relative overflow-hidden rounded-xl">
+                <img src="/demo/before1.jpg" className="w-full" />
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  Před
+                </div>
+              </div>
+
+              <div className="mt-3 text-sm text-neutral-600">
+                Odstranění škrábanců a prachu
+              </div>
+            </div>
+
+            {/* KARTA 2 */}
+            <div className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm">
+              <div className="relative overflow-hidden rounded-xl">
+                <img src="/demo/after1.jpg" className="w-full" />
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  Po
+                </div>
+              </div>
+
+              <div className="mt-3 text-sm text-neutral-600">
+                Vylepšená kvalita a ostrost
+              </div>
+            </div>
+
+            {/* KARTA 3 */}
+            <div className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm">
+              <div className="relative overflow-hidden rounded-xl">
+                <img src="/demo/color.jpg" className="w-full" />
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  Colorize
+                </div>
+              </div>
+
+              <div className="mt-3 text-sm text-neutral-600">
+                Obarvení černobílé fotografie
+              </div>
+            </div>
+
+          </div>
+        </section>
         <section className="mx-auto mt-20 max-w-6xl">
           <div className="mb-8 text-center">
             <h2 className="text-3xl font-bold tracking-tight">Časté otázky</h2>

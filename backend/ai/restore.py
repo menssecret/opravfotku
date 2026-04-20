@@ -1,16 +1,16 @@
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageFilter, ImageEnhance
 
-def restore_image(input_path: str, output_path: str):
-    image = Image.open(input_path).convert("RGB")
+def restore_image(input_path, output_path):
+    image = Image.open(input_path)
+
+    # silné vyhlazení
+    image = image.filter(ImageFilter.SMOOTH_MORE)
+
+    # zvýšení kontrastu
+    enhancer = ImageEnhance.Contrast(image)
+    image = enhancer.enhance(1.4)
+
+    # lehké doostření
     image = image.filter(ImageFilter.SHARPEN)
 
-    contrast = ImageEnhance.Contrast(image)
-    image = contrast.enhance(1.12)
-
-    brightness = ImageEnhance.Brightness(image)
-    image = brightness.enhance(1.04)
-
-    color = ImageEnhance.Color(image)
-    image = color.enhance(1.08)
-
-    image.save(output_path, quality=95)
+    image.save(output_path)

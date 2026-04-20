@@ -1,12 +1,10 @@
 from PIL import Image, ImageEnhance
 
-def colorize_image(input_path: str, output_path: str):
+def colorize_image(input_path, output_path):
     image = Image.open(input_path).convert("RGB")
 
-    color = ImageEnhance.Color(image)
-    image = color.enhance(1.25)
+    # simulace "colorize" přes saturaci
+    enhancer = ImageEnhance.Color(image)
+    image = enhancer.enhance(1.8)
 
-    brightness = ImageEnhance.Brightness(image)
-    image = brightness.enhance(1.05)
-
-    image.save(output_path, quality=95)
+    image.save(output_path)
