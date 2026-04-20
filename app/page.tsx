@@ -470,6 +470,8 @@ export default function Home() {
             Jednoduchá online AI oprava fotografií pro desktop i mobil.
           </p>
           <p className="mt-2">© 2026 opravfotku.cz</p>
+          <p className="mt-2">Kontakt: info@opravfotku.cz</p>
+          <p className="mt-2">Kontakt bude doplněn</p>
         </footer>
       </section>
     </main>
