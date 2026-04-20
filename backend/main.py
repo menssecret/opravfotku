@@ -63,6 +63,15 @@ async def upload(
     result_path = os.path.join(RESULT_DIR, filename)
 
     content = await file.read()
+    max_size = 10 * 1024 * 1024  # 10 MB
+
+if len(content) > max_size:
+    jobs[job_id] = {
+        "status": "error",
+        "mode": mode,
+        "error": "Soubor je příliš velký. Maximální velikost je 10 MB.",
+    }
+    return {"job_id": job_id}
 
     with open(upload_path, "wb") as f:
         f.write(content)

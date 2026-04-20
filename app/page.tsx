@@ -178,9 +178,11 @@ export default function Home() {
 
   const selectedMode = MODE_OPTIONS.find((item) => item.id === mode);
 
-  return (
+    return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-4 py-10">
+        
+        {/* HLAVIČKA */}
         <div className="mx-auto w-full max-w-3xl text-center">
           <div className="mb-4 inline-flex rounded-full border border-neutral-200 bg-white px-4 py-1 text-sm text-neutral-600">
             AI oprava starých a poškozených fotografií
@@ -196,6 +198,7 @@ export default function Home() {
           </p>
         </div>
 
+        {/* UPLOAD BOX */}
         <div className="mx-auto mt-10 w-full max-w-3xl rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
           <div
             onDrop={handleDrop}
@@ -221,49 +224,13 @@ export default function Home() {
               Klikni sem nebo přetáhni soubor myší
             </p>
             <p className="mt-2 text-sm text-neutral-400">JPG, PNG, WEBP</p>
+            <p className="mt-2 text-xs text-neutral-400">
+              Maximální velikost souboru: 10 MB
+            </p>
           </div>
 
           <div className="mt-5 text-center text-sm text-neutral-500">
             {file ? `Vybraný soubor: ${file.name}` : "Zatím není vybraná žádná fotka"}
-          </div>
-
-          <div className="mt-8">
-            <h3 className="mb-3 text-left text-sm font-medium text-neutral-700">
-              Vyber režim opravy
-            </h3>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              {MODE_OPTIONS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setMode(item.id)}
-                  className={`rounded-2xl border p-4 text-left transition ${
-                    mode === item.id
-                      ? "border-black bg-black text-white"
-                      : "border-neutral-300 bg-white text-neutral-800 hover:border-neutral-500"
-                  }`}
-                >
-                  <div className="text-sm font-semibold">{item.title}</div>
-                  <div
-                    className={`mt-1 text-sm ${
-                      mode === item.id ? "text-neutral-200" : "text-neutral-500"
-                    }`}
-                  >
-                    {item.description}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {selectedMode && (
-              <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
-                Vybraný režim:{" "}
-                <span className="font-semibold text-neutral-900">
-                  {selectedMode.title}
-                </span>
-              </div>
-            )}
           </div>
 
           <div className="mt-6 flex justify-center">
@@ -304,6 +271,7 @@ export default function Home() {
           )}
         </div>
 
+        {/* VÝSLEDEK */}
         {originalUrl && resultUrl && (
           <div className="mx-auto mt-10 w-full max-w-5xl rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between gap-4">
@@ -318,54 +286,32 @@ export default function Home() {
             </div>
 
             <div className="relative overflow-hidden rounded-2xl">
-              <img
-                src={originalUrl}
-                alt="Původní fotografie"
-                className="block w-full object-contain"
-              />
+              <img src={originalUrl} className="block w-full object-contain" />
 
               <div
                 className="absolute inset-y-0 left-0 overflow-hidden"
                 style={{ width: `${slider}%` }}
               >
-                <img
-                  src={resultUrl}
-                  alt="Opravená fotografie"
-                  className="block h-full w-full object-cover"
-                  style={{ width: "100%", minWidth: "100%" }}
-                />
-              </div>
-
-              <div
-                className="absolute top-0 bottom-0 w-1 bg-white shadow"
-                style={{ left: `${slider}%`, transform: "translateX(-50%)" }}
-              >
-                <div className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white text-sm shadow">
-                  ↔
-                </div>
-              </div>
-
-              <div className="absolute left-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
-                Po
-              </div>
-
-              <div className="absolute right-4 top-4 rounded-full bg-black/70 px-3 py-1 text-xs text-white">
-                Před
+                <img src={resultUrl} className="block h-full w-full object-cover" />
               </div>
             </div>
 
-            <div className="mt-6">
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={slider}
-                onChange={(e) => setSlider(Number(e.target.value))}
-                className="w-full"
-              />
-            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={slider}
+              onChange={(e) => setSlider(Number(e.target.value))}
+              className="mt-6 w-full"
+            />
           </div>
         )}
+
+        {/* FOOTER */}
+        <footer className="mx-auto mt-12 w-full max-w-5xl text-center text-sm text-neutral-500">
+          opravfotku.cz – jednoduchá AI oprava fotografií online
+        </footer>
+
       </section>
     </main>
   );
