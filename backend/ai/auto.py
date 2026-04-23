@@ -1,8 +1,22 @@
-from ai.restore import restore_image
-from ai.upscale import upscale_image
+import os
+from PIL import Image, ImageEnhance, ImageFilter
 
-def auto_image(input_path, output_path):
-    temp_path = output_path + "_temp.jpg"
+def auto_image(input_path: str, output_path: str):
+    image = Image.open(input_path).convert("RGB")
 
-    restore_image(input_path, temp_path)
-    upscale_image(temp_path, output_path)
+    image = image.filter(ImageFilter.MedianFilter(size=3))
+    image = image.filter(ImageFilter.SMOOTH_MORE)
+
+    contrast = ImageEnhance.Contrast(image)
+    image = contrast.enhance(1.18)
+
+    brightness = ImageEnhance.Brightness(image)
+    image = brightness.enhance(1.04)
+
+    color = ImageEnhance.Color(image)
+    image = color.enhance(1.12)
+
+    sharpness = ImageEnhance.Sharpness(image)
+    image = sharpness.enhance(1.22)
+
+    image.save(output_path, quality=95)
