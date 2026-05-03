@@ -36,7 +36,6 @@ export function BeforeAfterSlider({
     setPosition(pct);
   }, []);
 
-  // Drag přes window listeners ať můžeme uchopit handle a táhnout i mimo container
   useEffect(() => {
     if (!isDragging) return;
 
@@ -46,6 +45,8 @@ export function BeforeAfterSlider({
     }
     function onTouchMove(e: globalThis.TouchEvent) {
       if (e.touches.length === 0) return;
+      // Při aktivním dragu blokujeme scroll stránky
+      e.preventDefault();
       updateFromClientX(e.touches[0].clientX);
     }
     function onUp() {
@@ -54,7 +55,8 @@ export function BeforeAfterSlider({
 
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    // passive: false ať můžeme volat preventDefault na iOS
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onUp);
     window.addEventListener("touchcancel", onUp);
 
@@ -107,9 +109,8 @@ export function BeforeAfterSlider({
       aria-valuenow={Math.round(position)}
       aria-valuemin={0}
       aria-valuemax={100}
-      className="group relative grid w-full cursor-ew-resize touch-pan-y select-none overflow-hidden rounded-(--radius-card) border border-(--color-amber)/40 bg-(--color-surface) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-amber)"
+      className="group relative grid w-full cursor-ew-resize touch-none select-none overflow-hidden rounded-(--radius-card) border border-(--color-amber)/40 bg-(--color-surface) focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-amber)"
     >
-      {/* Před (spodní vrstva, určuje výšku containerlu) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={beforeUrl}
@@ -119,7 +120,6 @@ export function BeforeAfterSlider({
         style={{ gridArea: "1 / 1" }}
       />
 
-      {/* Po (horní vrstva, ořezaná clip-pathem podle pozice) */}
       <div
         className="pointer-events-none overflow-hidden"
         style={{
@@ -136,39 +136,38 @@ export function BeforeAfterSlider({
         />
       </div>
 
-      {/* Štítky */}
       <span
-        className="pointer-events-none absolute left-3 top-3 z-10 rounded-full bg-(--color-bg)/75 px-2.5 py-1 text-[10px] uppercase tracking-[0.28em] text-(--color-amber) backdrop-blur"
+        className="pointer-events-none absolute left-2 top-2 z-10 rounded-full bg-(--color-bg)/75 px-2 py-1 text-[10px] uppercase tracking-[0.28em] text-(--color-amber) backdrop-blur sm:left-3 sm:top-3 sm:px-2.5"
         style={{ opacity: position > 8 ? 1 : 0, transition: "opacity 150ms" }}
       >
         {afterLabel}
       </span>
       <span
-        className="pointer-events-none absolute right-3 top-3 z-10 rounded-full bg-(--color-bg)/75 px-2.5 py-1 text-[10px] uppercase tracking-[0.28em] text-(--color-ink-dim) backdrop-blur"
+        className="pointer-events-none absolute right-2 top-2 z-10 rounded-full bg-(--color-bg)/75 px-2 py-1 text-[10px] uppercase tracking-[0.28em] text-(--color-ink-dim) backdrop-blur sm:right-3 sm:top-3 sm:px-2.5"
         style={{ opacity: position < 92 ? 1 : 0, transition: "opacity 150ms" }}
       >
         {beforeLabel}
       </span>
 
-      {/* Vertikální linka */}
       <div
         className="pointer-events-none absolute bottom-0 top-0 w-px bg-(--color-amber)"
         style={{ left: `${position}%` }}
       />
 
-      {/* Drag handle */}
+      {/* Větší handle na mobilu (52px) než na desktopu (44px) */}
       <div
-        className="pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-(--color-amber) bg-(--color-bg)/85 text-(--color-amber) shadow-[0_0_24px_rgba(217,119,87,0.25)] backdrop-blur transition-transform group-hover:scale-110"
+        className="pointer-events-none absolute top-1/2 flex h-13 w-13 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-(--color-amber) bg-(--color-bg)/85 text-(--color-amber) shadow-[0_0_24px_rgba(217,119,87,0.25)] backdrop-blur transition-transform group-hover:scale-110 sm:h-11 sm:w-11"
         style={{
           left: `${position}%`,
           transform: `translate(-50%, -50%) ${isDragging ? "scale(1.1)" : ""}`,
+          width: "var(--handle-size, 52px)",
+          height: "var(--handle-size, 52px)",
         }}
       >
         <HandleGlyph />
       </div>
 
-      {/* Hint pro klávesy (jen když má focus a není drag) */}
-      <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-(--color-bg)/75 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint) opacity-0 backdrop-blur transition-opacity group-focus-within:opacity-100">
+      <span className="pointer-events-none absolute bottom-3 left-1/2 hidden -translate-x-1/2 rounded-full bg-(--color-bg)/75 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint) opacity-0 backdrop-blur transition-opacity group-focus-within:opacity-100 sm:block">
         ← →
       </span>
     </div>
@@ -178,8 +177,8 @@ export function BeforeAfterSlider({
 function HandleGlyph() {
   return (
     <svg
-      width="14"
-      height="14"
+      width="16"
+      height="16"
       viewBox="0 0 14 14"
       fill="none"
       stroke="currentColor"

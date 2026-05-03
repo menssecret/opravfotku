@@ -23,6 +23,10 @@
   html {
     background-color: var(--color-bg);
     color: var(--color-ink);
+    /* Lepší smooth scroll když uživatel klikne na vnitřní odkaz */
+    scroll-behavior: smooth;
+    /* Zabránit přiblížení textu na orientation change na iOS */
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
@@ -30,7 +34,11 @@
     font-feature-settings: "ss01", "cv11";
     background-color: var(--color-bg);
     min-height: 100vh;
+    /* Použít dynamic viewport height na moderních prohlížečích (řeší iOS Safari) */
+    min-height: 100dvh;
     position: relative;
+    /* Žádný overscroll bouncing s žlutým vidět */
+    overscroll-behavior-y: none;
   }
 
   body::before {
@@ -64,6 +72,16 @@
 
   textarea, input, button {
     font-family: inherit;
+  }
+
+  /* Lepší tap target highlight na mobilu (jemný amber místo modré výchozí) */
+  a, button {
+    -webkit-tap-highlight-color: rgba(217, 119, 87, 0.2);
+  }
+
+  /* iOS Safari: zabraň přiblížení input při focusu (kolik mizerných UX, věčný frustrace) */
+  textarea, input[type="text"], input[type="email"] {
+    font-size: 16px;
   }
 }
 

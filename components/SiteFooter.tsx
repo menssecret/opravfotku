@@ -4,26 +4,24 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative z-10 border-t border-(--color-line) mt-24">
-      <div className="mx-auto max-w-6xl px-6 py-12 sm:px-10 lg:px-16">
-        <div className="grid gap-10 lg:grid-cols-3">
-          {/* Brand */}
+    <footer className="relative z-10 border-t border-(--color-line) mt-16 sm:mt-24">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-10 sm:py-12 lg:px-16">
+        <div className="grid gap-8 sm:gap-10 sm:grid-cols-3">
           <div>
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.32em] text-(--color-amber)">
               <span className="inline-block h-px w-10 bg-(--color-amber)" />
               <span>opravfotku</span>
             </div>
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-(--color-ink-dim)">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-(--color-ink-dim) sm:mt-5">
               Úprava fotek pomocí jednoho promptu. Bez vrstev, bez pravítek.
             </p>
           </div>
 
-          {/* Stránky */}
           <div>
             <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
               Stránky
             </p>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="mt-3 space-y-2 text-sm sm:mt-4">
               <li>
                 <Link
                   href="/"
@@ -51,12 +49,11 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Postaveno na */}
           <div>
             <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
               Postaveno na
             </p>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="mt-3 space-y-2 text-sm sm:mt-4">
               <li>
                 <a
                   href="https://replicate.com/black-forest-labs/flux-kontext-pro"
@@ -91,7 +88,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-(--color-line) pt-6 text-xs text-(--color-ink-faint) sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-2 border-t border-(--color-line) pt-5 text-xs text-(--color-ink-faint) sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
           <p>© {year} opravfotku</p>
           <p className="font-(family-name:--font-display) italic">
             Made with intent, not with templates.

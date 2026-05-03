@@ -324,8 +324,8 @@ export function PhotoEditor() {
     status !== "submitting";
 
   return (
-    <main className="relative z-10 mx-auto max-w-6xl px-6 pt-16 pb-24 sm:px-10 sm:pt-20 lg:px-16">
-      <header className="mb-14 sm:mb-20">
+    <main className="relative z-10 mx-auto max-w-6xl px-4 pt-10 pb-16 sm:px-10 sm:pt-20 sm:pb-24 lg:px-16">
+      <header className="mb-10 sm:mb-20">
         <div className="flex items-center gap-3 animate-fade-up">
           <Image
             src="/logo.svg"
@@ -340,7 +340,7 @@ export function PhotoEditor() {
           </span>
         </div>
         <h1
-          className="mt-7 font-(family-name:--font-display) text-5xl leading-[0.95] tracking-tight text-balance sm:text-7xl lg:text-8xl animate-fade-up"
+          className="mt-6 font-(family-name:--font-display) text-4xl leading-[0.95] tracking-tight text-balance sm:mt-7 sm:text-7xl lg:text-8xl animate-fade-up"
           style={{ animationDelay: "60ms" }}
         >
           Oprav <em className="text-(--color-amber)">fotku.</em>
@@ -348,7 +348,7 @@ export function PhotoEditor() {
           <span className="text-(--color-ink-dim)">Stačí říct jak.</span>
         </h1>
         <p
-          className="mt-7 max-w-md text-base leading-relaxed text-(--color-ink-dim) animate-fade-up"
+          className="mt-5 max-w-md text-sm leading-relaxed text-(--color-ink-dim) sm:mt-7 sm:text-base animate-fade-up"
           style={{ animationDelay: "120ms" }}
         >
           Nahraj snímek, napiš co s ním. Žádné vrstvy, žádná pravítka.
@@ -363,7 +363,7 @@ export function PhotoEditor() {
         onClear={handleClearHistory}
       />
 
-      <section className="grid gap-6 lg:grid-cols-5">
+      <section className="grid gap-4 sm:gap-6 lg:grid-cols-5">
         {/* UPLOAD / PREVIEW */}
         <div
           className="lg:col-span-3 animate-fade-up"
@@ -396,13 +396,13 @@ export function PhotoEditor() {
                   alt="Aktuální vstup"
                   className="absolute inset-0 h-full w-full object-contain"
                 />
-                <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-(--color-bg)/85 to-transparent p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="font-(family-name:--font-display) text-sm italic text-(--color-ink-dim)">
+                <div className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-(--color-bg)/85 to-transparent p-3 sm:p-4">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="truncate font-(family-name:--font-display) text-xs italic text-(--color-ink-dim) sm:text-sm">
                       {originalFile?.name}
                     </span>
                     {iteration > 1 && (
-                      <span className="rounded-full border border-(--color-amber)/50 bg-(--color-amber)/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-(--color-amber)">
+                      <span className="shrink-0 rounded-full border border-(--color-amber)/50 bg-(--color-amber)/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-(--color-amber)">
                         krok {iteration}
                       </span>
                     )}
@@ -413,20 +413,20 @@ export function PhotoEditor() {
                       e.stopPropagation();
                       reset();
                     }}
-                    className="rounded-full border border-(--color-line-strong) bg-(--color-bg)/70 px-3 py-1 text-xs uppercase tracking-wider text-(--color-ink-dim) backdrop-blur transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
+                    className="shrink-0 rounded-full border border-(--color-line-strong) bg-(--color-bg)/70 px-3 py-1 text-xs uppercase tracking-wider text-(--color-ink-dim) backdrop-blur transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
                   >
                     Vyměnit
                   </button>
                 </div>
               </>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-8 text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 text-center sm:gap-5 sm:px-8">
                 <UploadGlyph />
                 <div>
-                  <p className="font-(family-name:--font-display) text-2xl text-(--color-ink)">
+                  <p className="font-(family-name:--font-display) text-xl text-(--color-ink) sm:text-2xl">
                     Přetáhni fotku sem
                   </p>
-                  <p className="mt-2 text-sm text-(--color-ink-faint)">
+                  <p className="mt-2 text-xs text-(--color-ink-faint) sm:text-sm">
                     nebo klikni a vyber. JPG, PNG, WebP. Max 10 MB.
                   </p>
                 </div>
@@ -440,11 +440,11 @@ export function PhotoEditor() {
           className="lg:col-span-2 animate-fade-up"
           style={{ animationDelay: "240ms" }}
         >
-          <div className="flex h-full flex-col gap-5 rounded-(--radius-card) border border-(--color-line) bg-(--color-surface) p-6 sm:p-7">
+          <div className="flex h-full flex-col gap-4 rounded-(--radius-card) border border-(--color-line) bg-(--color-surface) p-5 sm:gap-5 sm:p-7">
             <div className="flex items-baseline justify-between">
               <label
                 htmlFor="prompt"
-                className="font-(family-name:--font-display) text-2xl italic"
+                className="font-(family-name:--font-display) text-xl italic sm:text-2xl"
               >
                 {iteration === 1 ? "Co s tím uděláme?" : "Další úprava?"}
               </label>
@@ -465,11 +465,11 @@ export function PhotoEditor() {
                   ? "e.g. „Fix the overexposed sky and add warm light to faces."
                   : "e.g. „Increase contrast a bit and add a subtle vignette."
               }
-              className="min-h-[100px] flex-1 resize-none rounded-sm border border-(--color-line) bg-(--color-bg) px-4 py-3 text-base leading-relaxed text-(--color-ink) placeholder:text-(--color-ink-faint) focus:border-(--color-amber) focus:outline-none"
+              className="min-h-[100px] flex-1 resize-none rounded-sm border border-(--color-line) bg-(--color-bg) px-3 py-3 text-base leading-relaxed text-(--color-ink) placeholder:text-(--color-ink-faint) focus:border-(--color-amber) focus:outline-none sm:px-4"
             />
 
             {iteration === 1 ? (
-              <div className="space-y-5">
+              <div className="space-y-4 sm:space-y-5">
                 <div className="space-y-2">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
                     Profesionální
@@ -478,15 +478,15 @@ export function PhotoEditor() {
                     type="button"
                     onClick={() => applyPrompt(PORTRAIT_PRESET.prompt)}
                     title={PORTRAIT_PRESET.prompt}
-                    className={`group/portrait flex w-full flex-col items-start gap-1 rounded-sm border px-4 py-3 text-left transition-colors ${
+                    className={`group/portrait flex w-full flex-col items-start gap-1 rounded-sm border px-3 py-3 text-left transition-colors sm:px-4 ${
                       prompt === PORTRAIT_PRESET.prompt
                         ? "border-(--color-amber) bg-(--color-amber)/5"
                         : "border-(--color-line) bg-(--color-surface-2) hover:border-(--color-line-strong)"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className={`font-(family-name:--font-display) text-lg italic leading-tight ${
+                        className={`font-(family-name:--font-display) text-base italic leading-tight sm:text-lg ${
                           prompt === PORTRAIT_PRESET.prompt
                             ? "text-(--color-amber)"
                             : "text-(--color-ink) group-hover/portrait:text-(--color-amber)"
@@ -524,7 +524,7 @@ export function PhotoEditor() {
                           }`}
                         >
                           <span
-                            className={`font-(family-name:--font-display) text-base italic leading-tight ${
+                            className={`font-(family-name:--font-display) text-sm italic leading-tight sm:text-base ${
                               isActive
                                 ? "text-(--color-amber)"
                                 : "text-(--color-ink) group-hover/preset:text-(--color-amber)"
@@ -561,7 +561,7 @@ export function PhotoEditor() {
                           }`}
                         >
                           <span
-                            className={`font-(family-name:--font-display) text-base italic leading-tight ${
+                            className={`font-(family-name:--font-display) text-sm italic leading-tight sm:text-base ${
                               isActive
                                 ? "text-(--color-amber)"
                                 : "text-(--color-ink) group-hover/preset:text-(--color-amber)"
@@ -598,7 +598,7 @@ export function PhotoEditor() {
               </div>
             )}
 
-            <div className="mt-auto flex items-center justify-between gap-4 border-t border-(--color-line) pt-5">
+            <div className="mt-auto flex flex-col gap-3 border-t border-(--color-line) pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pt-5">
               <span className="text-xs text-(--color-ink-faint)">
                 {currentFile
                   ? iteration === 1
@@ -610,7 +610,7 @@ export function PhotoEditor() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                className="group relative inline-flex items-center gap-2 rounded-sm bg-(--color-amber) px-5 py-2.5 text-sm font-medium text-(--color-bg) transition-all hover:bg-(--color-amber-soft) disabled:cursor-not-allowed disabled:bg-(--color-surface-2) disabled:text-(--color-ink-faint)"
+                className="group relative inline-flex items-center justify-center gap-2 rounded-sm bg-(--color-amber) px-5 py-3 text-sm font-medium text-(--color-bg) transition-all hover:bg-(--color-amber-soft) disabled:cursor-not-allowed disabled:bg-(--color-surface-2) disabled:text-(--color-ink-faint) sm:py-2.5"
               >
                 {status === "submitting" ? (
                   <>
@@ -620,7 +620,7 @@ export function PhotoEditor() {
                 ) : (
                   <>
                     <span>Odeslat</span>
-                    <span className="text-(--color-bg)/60 group-disabled:text-(--color-ink-faint)">
+                    <span className="hidden text-(--color-bg)/60 group-disabled:text-(--color-ink-faint) sm:inline">
                       ⌘↵
                     </span>
                   </>
@@ -643,32 +643,32 @@ export function PhotoEditor() {
 
       {resultUrl && currentUrl && (
         <section
-          className="mt-16 animate-fade-up"
+          className="mt-12 sm:mt-16 animate-fade-up"
           style={{ animationDelay: "60ms" }}
         >
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="font-(family-name:--font-display) text-3xl italic">
+          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-baseline sm:justify-between">
+            <h2 className="font-(family-name:--font-display) text-2xl italic sm:text-3xl">
               {iteration === 1 ? "Hotovo." : `Krok ${iteration} hotov.`}
             </h2>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={continueEditing}
-                className="rounded-sm bg-(--color-amber) px-4 py-2 text-xs font-medium uppercase tracking-wider text-(--color-bg) transition-colors hover:bg-(--color-amber-soft)"
+                className="rounded-sm bg-(--color-amber) px-3 py-2 text-xs font-medium uppercase tracking-wider text-(--color-bg) transition-colors hover:bg-(--color-amber-soft) sm:px-4"
               >
                 Uprav dál →
               </button>
               <a
                 href={resultUrl}
                 download={`opravena-${originalFile?.name ?? "fotka"}`}
-                className="rounded-sm border border-(--color-line-strong) px-4 py-2 text-xs uppercase tracking-wider text-(--color-ink-dim) transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
+                className="rounded-sm border border-(--color-line-strong) px-3 py-2 text-xs uppercase tracking-wider text-(--color-ink-dim) transition-colors hover:border-(--color-amber) hover:text-(--color-amber) sm:px-4"
               >
                 Stáhnout
               </a>
               <button
                 type="button"
                 onClick={reset}
-                className="rounded-sm border border-(--color-line-strong) px-4 py-2 text-xs uppercase tracking-wider text-(--color-ink-dim) transition-colors hover:border-(--color-ink) hover:text-(--color-ink)"
+                className="rounded-sm border border-(--color-line-strong) px-3 py-2 text-xs uppercase tracking-wider text-(--color-ink-dim) transition-colors hover:border-(--color-ink) hover:text-(--color-ink) sm:px-4"
               >
                 Od začátku
               </button>
@@ -677,9 +677,12 @@ export function PhotoEditor() {
 
           <BeforeAfterSlider beforeUrl={currentUrl} afterUrl={resultUrl} />
 
-          <p className="mt-3 text-center text-xs text-(--color-ink-faint)">
-            Táhni za kolečko nebo klikni kamkoli pro porovnání. Klávesy ← →
-            posouvají po 5 %, se Shift po 1 %.
+          <p className="mt-3 text-center text-[10px] text-(--color-ink-faint) sm:text-xs">
+            <span className="sm:hidden">Táhni za kolečko pro porovnání.</span>
+            <span className="hidden sm:inline">
+              Táhni za kolečko nebo klikni kamkoli pro porovnání. Klávesy ← →
+              posouvají po 5 %, se Shift po 1 %.
+            </span>
           </p>
         </section>
       )}
@@ -690,13 +693,13 @@ export function PhotoEditor() {
 function UploadGlyph() {
   return (
     <svg
-      width="48"
-      height="48"
+      width="40"
+      height="40"
       viewBox="0 0 48 48"
       fill="none"
       stroke="currentColor"
       strokeWidth="1"
-      className="text-(--color-ink-dim)"
+      className="text-(--color-ink-dim) sm:h-12 sm:w-12"
       aria-hidden
     >
       <rect x="6" y="10" width="36" height="28" rx="1" />

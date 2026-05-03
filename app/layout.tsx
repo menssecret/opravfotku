@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Instrument_Serif } from "next/font/google";
 import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
@@ -22,9 +22,7 @@ export const metadata: Metadata = {
   },
   description: "Uprav fotku pomocí jednoho promptu. Bez vrstev, bez pravítek.",
   icons: {
-    icon: [
-      { url: "/logo-amber.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/logo-amber.svg", type: "image/svg+xml" }],
     apple: { url: "/logo-amber.svg" },
   },
   openGraph: {
@@ -34,6 +32,19 @@ export const metadata: Metadata = {
     type: "website",
     locale: "cs_CZ",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "opravfotku",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0e0c0a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
