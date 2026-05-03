@@ -19,7 +19,6 @@ import {
   type HistoryEntry,
 } from "@/lib/history";
 
-// Maximální délka promptu (původně 500, zvětšeno kvůli portrétnímu presetu)
 const MAX_PROMPT_LENGTH = 2000;
 
 type StylePreset = {
@@ -28,14 +27,63 @@ type StylePreset = {
   prompt: string;
 };
 
-// Speciální komplexní preset pro fotky lidí, vyčleněný nad standardními styly.
-// Editorial portrétní úprava: pleť, oči, pozadí, expozice, grading.
+// ──────────────────────────────────────────────────────────
+// Profesionální preset (top, full-width)
+// ──────────────────────────────────────────────────────────
+
 const PORTRAIT_PRESET: StylePreset = {
   name: "Profesionální portrét",
   desc: "editorial úprava: světlo, pleť, oči, pozadí",
   prompt:
     "Transform this portrait into a professional editorial photograph. Recover blown-out highlights in the bright background (window) while preserving a natural daylight feel. Balance exposure so the face is properly lit with subtle directional light and gentle shadowing for added depth. Refine skin tones to look natural and slightly warm but not washed out. Add subtle contrast and texture so the face has dimension, but preserve realistic skin texture without over-smoothing. Enhance the eyes: sharpen them slightly, add gentle catchlights, and improve micro-contrast around the eyes and brows so the gaze feels more alive. Improve overall sharpness and detail while keeping a soft, professional portrait look. Reduce the distracting background by slightly blurring and softening it so the face stands out, and tone down any bright vertical stripes in the background. Apply a clean, minimalist color grading in the style of magazine photography with balanced highlights, rich midtones, and gentle shadows. Do not change the composition, expression, or facial features.",
 };
+
+// ──────────────────────────────────────────────────────────
+// Specializované situace (6 nových presetů)
+// ──────────────────────────────────────────────────────────
+
+const SITUATION_PRESETS: StylePreset[] = [
+  {
+    name: "Vintage portrét",
+    desc: "obnova starých fotek lidí",
+    prompt:
+      "Restore this vintage portrait photograph. Carefully repair scratches, dust, tears, and any visible damage while preserving the original character of the photo. Recover faded colors with natural-looking tones, neither oversaturated nor too pale. If the photo is black and white, keep it black and white but improve contrast and tonal range. Sharpen facial features subtly without making them look artificial. Maintain the original grain and texture of the era. Do not modernize the look, do not change facial expressions, clothing, or composition. The result should look like a well-preserved original, not a digital recreation.",
+  },
+  {
+    name: "Fashion editorial",
+    desc: "magazínový high-end look",
+    prompt:
+      "Transform into a high-end fashion editorial photograph in the style of Vogue or Harper's Bazaar. Apply sophisticated color grading with deep blacks, clean whites, and rich midtones. Enhance fabric textures and details on clothing. Refine skin tones to look polished but realistic, preserving natural skin texture. Add subtle directional lighting that emphasizes the silhouette and form. Boost contrast in a controlled, editorial way. Keep the background clean and slightly muted to draw attention to the subject. The final look should feel cinematic, expensive, and polished. Do not change the pose, composition, or facial features.",
+  },
+  {
+    name: "Krajinka",
+    desc: "příroda, krajina, hory",
+    prompt:
+      "Enhance this landscape photograph for a dramatic but natural look. Recover details in highlights (sky, clouds) and shadows. Boost the richness of natural colors: deeper greens, warmer earth tones, more vibrant skies, but keep everything realistic and not oversaturated. Improve atmospheric depth with subtle haze in distant areas if appropriate. Sharpen mid-distance details (trees, rocks, structures) without making them harsh. Apply a clean, slightly cool color grading reminiscent of high-quality outdoor photography. Add gentle clarity to bring out textures in foliage and terrain. Do not change the composition, time of day, or weather conditions visible in the scene.",
+  },
+  {
+    name: "Produktová fotka",
+    desc: "e-shop, marketing",
+    prompt:
+      "Transform into a clean, professional product photograph suitable for e-commerce. Make the product crisp and sharp with all details clearly visible. Brighten and even out the lighting so the product is well-lit from all sides without harsh shadows. Clean up the background, making it neutral and uncluttered (white, light gray, or a subtle gradient). Add a soft natural shadow under the product for grounding. Enhance the product's colors to be accurate and vibrant. Remove any distracting elements, dust, or imperfections from the product surface. Improve overall sharpness and contrast for a premium catalog look. Do not change the product itself, its angle, or its proportions.",
+  },
+  {
+    name: "Real estate",
+    desc: "nemovitosti, interiér",
+    prompt:
+      "Enhance this real estate photograph for a professional listing. Brighten interiors and balance exposure so both windows and indoor spaces are properly visible (recover blown-out window views without making the room look dark). Make the space feel bright, spacious, and inviting. Correct any color casts from artificial lighting toward neutral, clean tones. Straighten verticals subtly if walls appear to lean. Enhance the warmth of wood and texture of textiles. Make whites clean and crisp. Increase clarity in architectural details. Slightly boost saturation in plants and decorative elements for life, while keeping walls and ceilings neutral. The room should look magazine-ready but realistic. Do not change the layout, furniture, or composition.",
+  },
+  {
+    name: "Foodie",
+    desc: "jídlo, restaurace",
+    prompt:
+      "Transform this food photograph into an appetizing, restaurant-quality image. Enhance the natural colors of the ingredients: make greens fresher, reds richer, yellows warmer, but keep everything looking real and edible (no artificial saturation). Improve texture and sharpness of the food so details like steam, oil sheen, and grain structure are visible. Add subtle warm lighting that makes the food feel inviting. Slightly soften the background and surrounding elements to make the food the clear focal point. Enhance contrast so the food has dimension. Maintain natural shadows and highlights that suggest dimension and freshness. Do not change the food itself, its arrangement, or the composition.",
+  },
+];
+
+// ──────────────────────────────────────────────────────────
+// Stylové úpravy (filtry, stávající)
+// ──────────────────────────────────────────────────────────
 
 const STYLE_PRESETS: StylePreset[] = [
   {
@@ -70,7 +118,7 @@ const STYLE_PRESETS: StylePreset[] = [
   },
   {
     name: "Restaurace",
-    desc: "obnova staré fotky",
+    desc: "obnova obecné fotky",
     prompt:
       "Restore old photo: fix scratches and dust, recover faded colors, sharpen details, repair damage, preserve original character",
   },
@@ -419,77 +467,120 @@ export function PhotoEditor() {
                   ? "e.g. „Fix the overexposed sky and add warm light to faces."
                   : "e.g. „Increase contrast a bit and add a subtle vignette."
               }
-              className="min-h-[120px] flex-1 resize-none rounded-sm border border-(--color-line) bg-(--color-bg) px-4 py-3 text-base leading-relaxed text-(--color-ink) placeholder:text-(--color-ink-faint) focus:border-(--color-amber) focus:outline-none"
+              className="min-h-[100px] flex-1 resize-none rounded-sm border border-(--color-line) bg-(--color-bg) px-4 py-3 text-base leading-relaxed text-(--color-ink) placeholder:text-(--color-ink-faint) focus:border-(--color-amber) focus:outline-none"
             />
 
-            {/* PRESETY */}
             {iteration === 1 ? (
-              <div className="space-y-3">
-                <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
-                  Styly
-                </p>
-
-                {/* Speciální preset pro portréty (full width) */}
-                <button
-                  type="button"
-                  onClick={() => applyPrompt(PORTRAIT_PRESET.prompt)}
-                  title={PORTRAIT_PRESET.prompt}
-                  className={`group/portrait flex w-full flex-col items-start gap-1 rounded-sm border px-4 py-3 text-left transition-colors ${
-                    prompt === PORTRAIT_PRESET.prompt
-                      ? "border-(--color-amber) bg-(--color-amber)/5"
-                      : "border-(--color-line) bg-(--color-surface-2) hover:border-(--color-line-strong)"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`font-(family-name:--font-display) text-lg italic leading-tight ${
-                        prompt === PORTRAIT_PRESET.prompt
-                          ? "text-(--color-amber)"
-                          : "text-(--color-ink) group-hover/portrait:text-(--color-amber)"
-                      }`}
-                    >
-                      {PORTRAIT_PRESET.name}
-                    </span>
-                    <span className="rounded-full border border-(--color-amber)/40 bg-(--color-amber)/10 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.2em] text-(--color-amber)">
-                      pro lidi
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-(--color-ink-faint)">
-                    {PORTRAIT_PRESET.desc}
-                  </span>
-                </button>
-
-                {/* Standardní styly */}
-                <div className="grid grid-cols-2 gap-2">
-                  {STYLE_PRESETS.map((p) => {
-                    const isActive = prompt === p.prompt;
-                    return (
-                      <button
-                        key={p.name}
-                        type="button"
-                        onClick={() => applyPrompt(p.prompt)}
-                        title={p.prompt}
-                        className={`group/preset flex flex-col items-start gap-0.5 rounded-sm border px-3 py-2.5 text-left transition-colors ${
-                          isActive
-                            ? "border-(--color-amber) bg-(--color-amber)/5"
-                            : "border-(--color-line) bg-(--color-surface-2) hover:border-(--color-line-strong)"
+              <div className="space-y-5">
+                {/* Profesionální preset (full-width) */}
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
+                    Profesionální
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => applyPrompt(PORTRAIT_PRESET.prompt)}
+                    title={PORTRAIT_PRESET.prompt}
+                    className={`group/portrait flex w-full flex-col items-start gap-1 rounded-sm border px-4 py-3 text-left transition-colors ${
+                      prompt === PORTRAIT_PRESET.prompt
+                        ? "border-(--color-amber) bg-(--color-amber)/5"
+                        : "border-(--color-line) bg-(--color-surface-2) hover:border-(--color-line-strong)"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`font-(family-name:--font-display) text-lg italic leading-tight ${
+                          prompt === PORTRAIT_PRESET.prompt
+                            ? "text-(--color-amber)"
+                            : "text-(--color-ink) group-hover/portrait:text-(--color-amber)"
                         }`}
                       >
-                        <span
-                          className={`font-(family-name:--font-display) text-base italic leading-tight ${
+                        {PORTRAIT_PRESET.name}
+                      </span>
+                      <span className="rounded-full border border-(--color-amber)/40 bg-(--color-amber)/10 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.2em] text-(--color-amber)">
+                        pro lidi
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-(--color-ink-faint)">
+                      {PORTRAIT_PRESET.desc}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Specializované situace */}
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
+                    Pro situaci
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {SITUATION_PRESETS.map((p) => {
+                      const isActive = prompt === p.prompt;
+                      return (
+                        <button
+                          key={p.name}
+                          type="button"
+                          onClick={() => applyPrompt(p.prompt)}
+                          title={p.prompt}
+                          className={`group/preset flex flex-col items-start gap-0.5 rounded-sm border px-3 py-2.5 text-left transition-colors ${
                             isActive
-                              ? "text-(--color-amber)"
-                              : "text-(--color-ink) group-hover/preset:text-(--color-amber)"
+                              ? "border-(--color-amber) bg-(--color-amber)/5"
+                              : "border-(--color-line) bg-(--color-surface-2) hover:border-(--color-line-strong)"
                           }`}
                         >
-                          {p.name}
-                        </span>
-                        <span className="text-[10px] text-(--color-ink-faint)">
-                          {p.desc}
-                        </span>
-                      </button>
-                    );
-                  })}
+                          <span
+                            className={`font-(family-name:--font-display) text-base italic leading-tight ${
+                              isActive
+                                ? "text-(--color-amber)"
+                                : "text-(--color-ink) group-hover/preset:text-(--color-amber)"
+                            }`}
+                          >
+                            {p.name}
+                          </span>
+                          <span className="text-[10px] text-(--color-ink-faint)">
+                            {p.desc}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Stylové úpravy / filtry */}
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
+                    Stylové úpravy
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {STYLE_PRESETS.map((p) => {
+                      const isActive = prompt === p.prompt;
+                      return (
+                        <button
+                          key={p.name}
+                          type="button"
+                          onClick={() => applyPrompt(p.prompt)}
+                          title={p.prompt}
+                          className={`group/preset flex flex-col items-start gap-0.5 rounded-sm border px-3 py-2.5 text-left transition-colors ${
+                            isActive
+                              ? "border-(--color-amber) bg-(--color-amber)/5"
+                              : "border-(--color-line) bg-(--color-surface-2) hover:border-(--color-line-strong)"
+                          }`}
+                        >
+                          <span
+                            className={`font-(family-name:--font-display) text-base italic leading-tight ${
+                              isActive
+                                ? "text-(--color-amber)"
+                                : "text-(--color-ink) group-hover/preset:text-(--color-amber)"
+                            }`}
+                          >
+                            {p.name}
+                          </span>
+                          <span className="text-[10px] text-(--color-ink-faint)">
+                            {p.desc}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             ) : (
