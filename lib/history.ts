@@ -1,8 +1,6 @@
 // lib/history.ts
 //
-// Tenký wrapper kolem IndexedDB pro ukládání posledních úprav.
-// Drží Blob přímo (IDB to umí nativně), takže nemusíme nic base64ovat.
-// localStorage by to nezvládl pro plné fotky.
+// IndexedDB wrapper for last edits.
 
 const DB_NAME = "opravfotku";
 const DB_VERSION = 1;
@@ -13,9 +11,7 @@ export interface HistoryEntry {
   id: string;
   timestamp: number;
   prompt: string;
-  /** Malý JPEG thumbnail jako data URL pro UI (rychlé renderování). */
   thumbnailDataUrl: string;
-  /** Plný Blob výsledku. Z něj se vyrobí File pro znovupoužití. */
   blob: Blob;
   mimeType: string;
 }
@@ -62,7 +58,6 @@ export async function addHistoryEntry(input: {
     tx.onerror = () => rej(tx.error);
   });
 
-  // Po přidání pohlídáme limit a smažeme nejstarší navíc
   const all = await listHistoryEntries();
   if (all.length > MAX_ENTRIES) {
     const toRemove = all.slice(MAX_ENTRIES);
@@ -79,7 +74,6 @@ export async function listHistoryEntries(): Promise<HistoryEntry[]> {
     const req = tx.objectStore(STORE).getAll();
     req.onsuccess = () => {
       const entries = req.result as HistoryEntry[];
-      // Newest first
       entries.sort((a, b) => b.timestamp - a.timestamp);
       res(entries);
     };
@@ -106,10 +100,6 @@ export async function clearHistory(): Promise<void> {
     tx.onerror = () => rej(tx.error);
   });
 }
-
-// ──────────────────────────────────────────────────────────
-// Thumbnail generování přes canvas (256 px max strana, JPEG q=0.7)
-// ──────────────────────────────────────────────────────────
 
 async function makeThumbnail(blob: Blob, maxSize: number): Promise<string> {
   const url = URL.createObjectURL(blob);
@@ -139,20 +129,32 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// ──────────────────────────────────────────────────────────
-// Pomocné formátování (relativní čas pro UI)
-// ──────────────────────────────────────────────────────────
-
-export function formatRelativeTime(ts: number, now = Date.now()): string {
+/**
+ * Locale-aware relative time formatter.
+ * Reads templates from a dictionary so each language can phrase it correctly.
+ */
+export function formatRelativeTime(
+  ts: number,
+  templates: {
+    now: string;
+    moment: string;
+    minutes: string;
+    hours: string;
+    day: string;
+    days: string;
+  },
+  now = Date.now(),
+): string {
   const diff = Math.max(0, now - ts);
   const sec = Math.floor(diff / 1000);
-  if (sec < 30) return "teď";
-  if (sec < 60) return "před chvílí";
+  if (sec < 30) return templates.now;
+  if (sec < 60) return templates.moment;
   const min = Math.floor(sec / 60);
-  if (min < 60) return `před ${min} min`;
+  if (min < 60) return templates.minutes.replace("{n}", String(min));
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `před ${hr} h`;
+  if (hr < 24) return templates.hours.replace("{n}", String(hr));
   const days = Math.floor(hr / 24);
-  if (days < 7) return `před ${days} ${days === 1 ? "dnem" : "dny"}`;
-  return new Date(ts).toLocaleDateString("cs-CZ");
+  if (days === 1) return templates.day;
+  if (days < 7) return templates.days.replace("{n}", String(days));
+  return new Date(ts).toLocaleDateString();
 }

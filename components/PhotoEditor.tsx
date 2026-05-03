@@ -19,111 +19,54 @@ import {
   removeHistoryEntry,
   type HistoryEntry,
 } from "@/lib/history";
+import type { Locale } from "@/lib/i18n/config";
+import { tFormat, type Dict } from "@/lib/i18n/dictionaries";
 
 const MAX_PROMPT_LENGTH = 2000;
 
-type StylePreset = {
-  name: string;
-  desc: string;
-  prompt: string;
-};
+// English prompts stay in English regardless of UI language — Flux Kontext
+// works best with English instructions. Only the UI labels are translated.
 
-const PORTRAIT_PRESET: StylePreset = {
-  name: "Profesionální portrét",
-  desc: "editorial úprava: světlo, pleť, oči, pozadí",
-  prompt:
-    "Transform this portrait into a professional editorial photograph. Recover blown-out highlights in the bright background (window) while preserving a natural daylight feel. Balance exposure so the face is properly lit with subtle directional light and gentle shadowing for added depth. Refine skin tones to look natural and slightly warm but not washed out. Add subtle contrast and texture so the face has dimension, but preserve realistic skin texture without over-smoothing. Enhance the eyes: sharpen them slightly, add gentle catchlights, and improve micro-contrast around the eyes and brows so the gaze feels more alive. Improve overall sharpness and detail while keeping a soft, professional portrait look. Reduce the distracting background by slightly blurring and softening it so the face stands out, and tone down any bright vertical stripes in the background. Apply a clean, minimalist color grading in the style of magazine photography with balanced highlights, rich midtones, and gentle shadows. Do not change the composition, expression, or facial features.",
-};
+const PORTRAIT_PROMPT =
+  "Transform this portrait into a professional editorial photograph. Recover blown-out highlights in the bright background (window) while preserving a natural daylight feel. Balance exposure so the face is properly lit with subtle directional light and gentle shadowing for added depth. Refine skin tones to look natural and slightly warm but not washed out. Add subtle contrast and texture so the face has dimension, but preserve realistic skin texture without over-smoothing. Enhance the eyes: sharpen them slightly, add gentle catchlights, and improve micro-contrast around the eyes and brows so the gaze feels more alive. Improve overall sharpness and detail while keeping a soft, professional portrait look. Reduce the distracting background by slightly blurring and softening it so the face stands out, and tone down any bright vertical stripes in the background. Apply a clean, minimalist color grading in the style of magazine photography with balanced highlights, rich midtones, and gentle shadows. Do not change the composition, expression, or facial features.";
 
-const SITUATION_PRESETS: StylePreset[] = [
-  {
-    name: "Vintage portrét",
-    desc: "obnova starých fotek lidí",
-    prompt:
-      "Restore this vintage portrait photograph. Carefully repair scratches, dust, tears, and any visible damage while preserving the original character of the photo. Recover faded colors with natural-looking tones, neither oversaturated nor too pale. If the photo is black and white, keep it black and white but improve contrast and tonal range. Sharpen facial features subtly without making them look artificial. Maintain the original grain and texture of the era. Do not modernize the look, do not change facial expressions, clothing, or composition. The result should look like a well-preserved original, not a digital recreation.",
-  },
-  {
-    name: "Fashion editorial",
-    desc: "magazínový high-end look",
-    prompt:
-      "Transform into a high-end fashion editorial photograph in the style of Vogue or Harper's Bazaar. Apply sophisticated color grading with deep blacks, clean whites, and rich midtones. Enhance fabric textures and details on clothing. Refine skin tones to look polished but realistic, preserving natural skin texture. Add subtle directional lighting that emphasizes the silhouette and form. Boost contrast in a controlled, editorial way. Keep the background clean and slightly muted to draw attention to the subject. The final look should feel cinematic, expensive, and polished. Do not change the pose, composition, or facial features.",
-  },
-  {
-    name: "Krajinka",
-    desc: "příroda, krajina, hory",
-    prompt:
-      "Enhance this landscape photograph for a dramatic but natural look. Recover details in highlights (sky, clouds) and shadows. Boost the richness of natural colors: deeper greens, warmer earth tones, more vibrant skies, but keep everything realistic and not oversaturated. Improve atmospheric depth with subtle haze in distant areas if appropriate. Sharpen mid-distance details (trees, rocks, structures) without making them harsh. Apply a clean, slightly cool color grading reminiscent of high-quality outdoor photography. Add gentle clarity to bring out textures in foliage and terrain. Do not change the composition, time of day, or weather conditions visible in the scene.",
-  },
-  {
-    name: "Produktová fotka",
-    desc: "e-shop, marketing",
-    prompt:
-      "Transform into a clean, professional product photograph suitable for e-commerce. Make the product crisp and sharp with all details clearly visible. Brighten and even out the lighting so the product is well-lit from all sides without harsh shadows. Clean up the background, making it neutral and uncluttered (white, light gray, or a subtle gradient). Add a soft natural shadow under the product for grounding. Enhance the product's colors to be accurate and vibrant. Remove any distracting elements, dust, or imperfections from the product surface. Improve overall sharpness and contrast for a premium catalog look. Do not change the product itself, its angle, or its proportions.",
-  },
-  {
-    name: "Real estate",
-    desc: "nemovitosti, interiér",
-    prompt:
-      "Enhance this real estate photograph for a professional listing. Brighten interiors and balance exposure so both windows and indoor spaces are properly visible (recover blown-out window views without making the room look dark). Make the space feel bright, spacious, and inviting. Correct any color casts from artificial lighting toward neutral, clean tones. Straighten verticals subtly if walls appear to lean. Enhance the warmth of wood and texture of textiles. Make whites clean and crisp. Increase clarity in architectural details. Slightly boost saturation in plants and decorative elements for life, while keeping walls and ceilings neutral. The room should look magazine-ready but realistic. Do not change the layout, furniture, or composition.",
-  },
-  {
-    name: "Foodie",
-    desc: "jídlo, restaurace",
-    prompt:
-      "Transform this food photograph into an appetizing, restaurant-quality image. Enhance the natural colors of the ingredients: make greens fresher, reds richer, yellows warmer, but keep everything looking real and edible (no artificial saturation). Improve texture and sharpness of the food so details like steam, oil sheen, and grain structure are visible. Add subtle warm lighting that makes the food feel inviting. Slightly soften the background and surrounding elements to make the food the clear focal point. Enhance contrast so the food has dimension. Maintain natural shadows and highlights that suggest dimension and freshness. Do not change the food itself, its arrangement, or the composition.",
-  },
-];
+const SITUATION_PROMPTS = {
+  vintagePortrait:
+    "Restore this vintage portrait photograph. Carefully repair scratches, dust, tears, and any visible damage while preserving the original character of the photo. Recover faded colors with natural-looking tones, neither oversaturated nor too pale. If the photo is black and white, keep it black and white but improve contrast and tonal range. Sharpen facial features subtly without making them look artificial. Maintain the original grain and texture of the era. Do not modernize the look, do not change facial expressions, clothing, or composition. The result should look like a well-preserved original, not a digital recreation.",
+  fashion:
+    "Transform into a high-end fashion editorial photograph in the style of Vogue or Harper's Bazaar. Apply sophisticated color grading with deep blacks, clean whites, and rich midtones. Enhance fabric textures and details on clothing. Refine skin tones to look polished but realistic, preserving natural skin texture. Add subtle directional lighting that emphasizes the silhouette and form. Boost contrast in a controlled, editorial way. Keep the background clean and slightly muted to draw attention to the subject. The final look should feel cinematic, expensive, and polished. Do not change the pose, composition, or facial features.",
+  landscape:
+    "Enhance this landscape photograph for a dramatic but natural look. Recover details in highlights (sky, clouds) and shadows. Boost the richness of natural colors: deeper greens, warmer earth tones, more vibrant skies, but keep everything realistic and not oversaturated. Improve atmospheric depth with subtle haze in distant areas if appropriate. Sharpen mid-distance details (trees, rocks, structures) without making them harsh. Apply a clean, slightly cool color grading reminiscent of high-quality outdoor photography. Add gentle clarity to bring out textures in foliage and terrain. Do not change the composition, time of day, or weather conditions visible in the scene.",
+  product:
+    "Transform into a clean, professional product photograph suitable for e-commerce. Make the product crisp and sharp with all details clearly visible. Brighten and even out the lighting so the product is well-lit from all sides without harsh shadows. Clean up the background, making it neutral and uncluttered (white, light gray, or a subtle gradient). Add a soft natural shadow under the product for grounding. Enhance the product's colors to be accurate and vibrant. Remove any distracting elements, dust, or imperfections from the product surface. Improve overall sharpness and contrast for a premium catalog look. Do not change the product itself, its angle, or its proportions.",
+  realEstate:
+    "Enhance this real estate photograph for a professional listing. Brighten interiors and balance exposure so both windows and indoor spaces are properly visible (recover blown-out window views without making the room look dark). Make the space feel bright, spacious, and inviting. Correct any color casts from artificial lighting toward neutral, clean tones. Straighten verticals subtly if walls appear to lean. Enhance the warmth of wood and texture of textiles. Make whites clean and crisp. Increase clarity in architectural details. Slightly boost saturation in plants and decorative elements for life, while keeping walls and ceilings neutral. The room should look magazine-ready but realistic. Do not change the layout, furniture, or composition.",
+  foodie:
+    "Transform this food photograph into an appetizing, restaurant-quality image. Enhance the natural colors of the ingredients: make greens fresher, reds richer, yellows warmer, but keep everything looking real and edible (no artificial saturation). Improve texture and sharpness of the food so details like steam, oil sheen, and grain structure are visible. Add subtle warm lighting that makes the food feel inviting. Slightly soften the background and surrounding elements to make the food the clear focal point. Enhance contrast so the food has dimension. Maintain natural shadows and highlights that suggest dimension and freshness. Do not change the food itself, its arrangement, or the composition.",
+} as const;
 
-const STYLE_PRESETS: StylePreset[] = [
-  {
-    name: "Černobílá",
-    desc: "klasika, kontrast",
-    prompt:
-      "Convert to high-contrast black and white photography, preserve all details, deep blacks and clean whites",
-  },
-  {
-    name: "Vintage film",
-    desc: "70. léta",
-    prompt:
-      "Apply vintage 1970s film aesthetic: warm tones, faded shadows, subtle grain, slightly washed out highlights",
-  },
-  {
-    name: "Cinematic",
-    desc: "teal & orange",
-    prompt:
-      "Apply cinematic teal and orange color grading, dramatic lighting, subtle film grain, professional film look",
-  },
-  {
-    name: "Olejomalba",
-    desc: "tahy štětcem",
-    prompt:
-      "Transform into a classical oil painting with visible brushstrokes, rich colors, painterly canvas texture",
-  },
-  {
-    name: "Studio Ghibli",
-    desc: "ručně malovaná",
-    prompt:
-      "Transform into Studio Ghibli animated illustration style with soft watercolor textures, hand-painted feel, gentle pastel colors",
-  },
-  {
-    name: "Restaurace",
-    desc: "obnova obecné fotky",
-    prompt:
-      "Restore old photo: fix scratches and dust, recover faded colors, sharpen details, repair damage, preserve original character",
-  },
-];
-
-const FOLLOWUP_PROMPTS = [
-  "Increase contrast and saturation",
-  "Add subtle film grain",
-  "Crop tighter on the subject",
-  "Soften the highlights",
-  "Apply a warmer tone",
-];
+const STYLE_PROMPTS = {
+  bw: "Convert to high-contrast black and white photography, preserve all details, deep blacks and clean whites",
+  vintageFilm:
+    "Apply vintage 1970s film aesthetic: warm tones, faded shadows, subtle grain, slightly washed out highlights",
+  cinematic:
+    "Apply cinematic teal and orange color grading, dramatic lighting, subtle film grain, professional film look",
+  oilPainting:
+    "Transform into a classical oil painting with visible brushstrokes, rich colors, painterly canvas texture",
+  ghibli:
+    "Transform into Studio Ghibli animated illustration style with soft watercolor textures, hand-painted feel, gentle pastel colors",
+  restore:
+    "Restore old photo: fix scratches and dust, recover faded colors, sharpen details, repair damage, preserve original character",
+} as const;
 
 type Status = "idle" | "submitting" | "done" | "error";
 
-export function PhotoEditor() {
+type Props = {
+  dict: Dict;
+  locale: Locale;
+};
+
+export function PhotoEditor({ dict, locale }: Props) {
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
@@ -172,16 +115,16 @@ export function PhotoEditor() {
   const acceptFile = useCallback(
     (f: File) => {
       if (!f.type.startsWith("image/")) {
-        setErrorMsg("Tohle nevypadá jako obrázek.");
+        setErrorMsg(dict.upload.notImage);
         return;
       }
       if (f.size > 10 * 1024 * 1024) {
-        setErrorMsg("Obrázek je větší než 10 MB.");
+        setErrorMsg(dict.upload.tooLarge);
         return;
       }
       setNewInput(f);
     },
-    [setNewInput],
+    [setNewInput, dict],
   );
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -242,7 +185,7 @@ export function PhotoEditor() {
         setIteration((i) => i + 1);
       })
       .catch(() => {
-        setErrorMsg("Nepodařilo se připravit fotku k další úpravě.");
+        setErrorMsg(dict.prompt.couldNotLoadResult);
       });
   }
 
@@ -302,7 +245,7 @@ export function PhotoEditor() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.error ?? `Server vrátil ${res.status}.`);
+        throw new Error(data?.error ?? `Server returned ${res.status}.`);
       }
       const blob = await res.blob();
       setResultUrl(URL.createObjectURL(blob));
@@ -314,7 +257,9 @@ export function PhotoEditor() {
         .catch(() => {});
     } catch (err) {
       setStatus("error");
-      setErrorMsg(err instanceof Error ? err.message : "Něco se pokazilo.");
+      setErrorMsg(
+        err instanceof Error ? err.message : dict.prompt.fallbackError,
+      );
     }
   }
 
@@ -322,6 +267,69 @@ export function PhotoEditor() {
     currentFile !== null &&
     prompt.trim().length > 0 &&
     status !== "submitting";
+
+  // Build situation/style preset arrays from dict + prompt constants
+  const situationPresets = [
+    {
+      key: "vintagePortrait",
+      ...dict.presets.situations.vintagePortrait,
+      prompt: SITUATION_PROMPTS.vintagePortrait,
+    },
+    {
+      key: "fashion",
+      ...dict.presets.situations.fashion,
+      prompt: SITUATION_PROMPTS.fashion,
+    },
+    {
+      key: "landscape",
+      ...dict.presets.situations.landscape,
+      prompt: SITUATION_PROMPTS.landscape,
+    },
+    {
+      key: "product",
+      ...dict.presets.situations.product,
+      prompt: SITUATION_PROMPTS.product,
+    },
+    {
+      key: "realEstate",
+      ...dict.presets.situations.realEstate,
+      prompt: SITUATION_PROMPTS.realEstate,
+    },
+    {
+      key: "foodie",
+      ...dict.presets.situations.foodie,
+      prompt: SITUATION_PROMPTS.foodie,
+    },
+  ];
+
+  const stylePresets = [
+    { key: "bw", ...dict.presets.styles.bw, prompt: STYLE_PROMPTS.bw },
+    {
+      key: "vintageFilm",
+      ...dict.presets.styles.vintageFilm,
+      prompt: STYLE_PROMPTS.vintageFilm,
+    },
+    {
+      key: "cinematic",
+      ...dict.presets.styles.cinematic,
+      prompt: STYLE_PROMPTS.cinematic,
+    },
+    {
+      key: "oilPainting",
+      ...dict.presets.styles.oilPainting,
+      prompt: STYLE_PROMPTS.oilPainting,
+    },
+    {
+      key: "ghibli",
+      ...dict.presets.styles.ghibli,
+      prompt: STYLE_PROMPTS.ghibli,
+    },
+    {
+      key: "restore",
+      ...dict.presets.styles.restore,
+      prompt: STYLE_PROMPTS.restore,
+    },
+  ];
 
   return (
     <main className="relative z-10 mx-auto max-w-6xl px-4 pt-10 pb-16 sm:px-10 sm:pt-20 sm:pb-24 lg:px-16">
@@ -336,23 +344,25 @@ export function PhotoEditor() {
             className="opacity-90"
           />
           <span className="text-[11px] uppercase tracking-[0.32em] text-(--color-amber)">
-            opravfotku
+            {dict.header.brand}
           </span>
         </div>
         <h1
           className="mt-6 font-(family-name:--font-display) text-4xl leading-[0.95] tracking-tight text-balance sm:mt-7 sm:text-7xl lg:text-8xl animate-fade-up"
           style={{ animationDelay: "60ms" }}
         >
-          Oprav <em className="text-(--color-amber)">fotku.</em>
+          {dict.header.heroLine1}{" "}
+          <em className="text-(--color-amber)">{dict.header.heroAccent}</em>
           <br />
-          <span className="text-(--color-ink-dim)">Stačí říct jak.</span>
+          <span className="text-(--color-ink-dim)">
+            {dict.header.heroLine2}
+          </span>
         </h1>
         <p
           className="mt-5 max-w-md text-sm leading-relaxed text-(--color-ink-dim) sm:mt-7 sm:text-base animate-fade-up"
           style={{ animationDelay: "120ms" }}
         >
-          Nahraj snímek, napiš co s ním. Žádné vrstvy, žádná pravítka.
-          Jen prompt.
+          {dict.header.tagline}
         </p>
       </header>
 
@@ -361,10 +371,11 @@ export function PhotoEditor() {
         onSelect={loadFromHistory}
         onRemove={handleRemoveFromHistory}
         onClear={handleClearHistory}
+        dict={dict}
+        locale={locale}
       />
 
       <section className="grid gap-4 sm:gap-6 lg:grid-cols-5">
-        {/* UPLOAD / PREVIEW */}
         <div
           className="lg:col-span-3 animate-fade-up"
           style={{ animationDelay: "180ms" }}
@@ -403,7 +414,7 @@ export function PhotoEditor() {
                     </span>
                     {iteration > 1 && (
                       <span className="shrink-0 rounded-full border border-(--color-amber)/50 bg-(--color-amber)/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-(--color-amber)">
-                        krok {iteration}
+                        {tFormat(dict.upload.stepBadge, { n: iteration })}
                       </span>
                     )}
                   </div>
@@ -415,7 +426,7 @@ export function PhotoEditor() {
                     }}
                     className="shrink-0 rounded-full border border-(--color-line-strong) bg-(--color-bg)/70 px-3 py-1 text-xs uppercase tracking-wider text-(--color-ink-dim) backdrop-blur transition-colors hover:border-(--color-amber) hover:text-(--color-amber)"
                   >
-                    Vyměnit
+                    {dict.upload.swap}
                   </button>
                 </div>
               </>
@@ -424,10 +435,10 @@ export function PhotoEditor() {
                 <UploadGlyph />
                 <div>
                   <p className="font-(family-name:--font-display) text-xl text-(--color-ink) sm:text-2xl">
-                    Přetáhni fotku sem
+                    {dict.upload.dropTitle}
                   </p>
                   <p className="mt-2 text-xs text-(--color-ink-faint) sm:text-sm">
-                    nebo klikni a vyber. JPG, PNG, WebP. Max 10 MB.
+                    {dict.upload.dropHint}
                   </p>
                 </div>
               </div>
@@ -435,7 +446,6 @@ export function PhotoEditor() {
           </div>
         </div>
 
-        {/* PROMPT PANEL */}
         <div
           className="lg:col-span-2 animate-fade-up"
           style={{ animationDelay: "240ms" }}
@@ -446,7 +456,9 @@ export function PhotoEditor() {
                 htmlFor="prompt"
                 className="font-(family-name:--font-display) text-xl italic sm:text-2xl"
               >
-                {iteration === 1 ? "Co s tím uděláme?" : "Další úprava?"}
+                {iteration === 1
+                  ? dict.prompt.headingFirst
+                  : dict.prompt.headingNext}
               </label>
               <span className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
                 {prompt.length}/{MAX_PROMPT_LENGTH}
@@ -462,8 +474,8 @@ export function PhotoEditor() {
               onKeyDown={handlePromptKeyDown}
               placeholder={
                 iteration === 1
-                  ? "e.g. „Fix the overexposed sky and add warm light to faces."
-                  : "e.g. „Increase contrast a bit and add a subtle vignette."
+                  ? dict.prompt.placeholderFirst
+                  : dict.prompt.placeholderNext
               }
               className="min-h-[100px] flex-1 resize-none rounded-sm border border-(--color-line) bg-(--color-bg) px-3 py-3 text-base leading-relaxed text-(--color-ink) placeholder:text-(--color-ink-faint) focus:border-(--color-amber) focus:outline-none sm:px-4"
             />
@@ -472,14 +484,14 @@ export function PhotoEditor() {
               <div className="space-y-4 sm:space-y-5">
                 <div className="space-y-2">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
-                    Profesionální
+                    {dict.prompt.sectionPro}
                   </p>
                   <button
                     type="button"
-                    onClick={() => applyPrompt(PORTRAIT_PRESET.prompt)}
-                    title={PORTRAIT_PRESET.prompt}
+                    onClick={() => applyPrompt(PORTRAIT_PROMPT)}
+                    title={PORTRAIT_PROMPT}
                     className={`group/portrait flex w-full flex-col items-start gap-1 rounded-sm border px-3 py-3 text-left transition-colors sm:px-4 ${
-                      prompt === PORTRAIT_PRESET.prompt
+                      prompt === PORTRAIT_PROMPT
                         ? "border-(--color-amber) bg-(--color-amber)/5"
                         : "border-(--color-line) bg-(--color-surface-2) hover:border-(--color-line-strong)"
                     }`}
@@ -487,33 +499,33 @@ export function PhotoEditor() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className={`font-(family-name:--font-display) text-base italic leading-tight sm:text-lg ${
-                          prompt === PORTRAIT_PRESET.prompt
+                          prompt === PORTRAIT_PROMPT
                             ? "text-(--color-amber)"
                             : "text-(--color-ink) group-hover/portrait:text-(--color-amber)"
                         }`}
                       >
-                        {PORTRAIT_PRESET.name}
+                        {dict.presets.portrait.name}
                       </span>
                       <span className="rounded-full border border-(--color-amber)/40 bg-(--color-amber)/10 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.2em] text-(--color-amber)">
-                        pro lidi
+                        {dict.prompt.badgeForPeople}
                       </span>
                     </div>
                     <span className="text-[11px] text-(--color-ink-faint)">
-                      {PORTRAIT_PRESET.desc}
+                      {dict.presets.portrait.desc}
                     </span>
                   </button>
                 </div>
 
                 <div className="space-y-2">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
-                    Pro situaci
+                    {dict.prompt.sectionForSituation}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {SITUATION_PRESETS.map((p) => {
+                    {situationPresets.map((p) => {
                       const isActive = prompt === p.prompt;
                       return (
                         <button
-                          key={p.name}
+                          key={p.key}
                           type="button"
                           onClick={() => applyPrompt(p.prompt)}
                           title={p.prompt}
@@ -543,14 +555,14 @@ export function PhotoEditor() {
 
                 <div className="space-y-2">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
-                    Stylové úpravy
+                    {dict.prompt.sectionStyles}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {STYLE_PRESETS.map((p) => {
+                    {stylePresets.map((p) => {
                       const isActive = prompt === p.prompt;
                       return (
                         <button
-                          key={p.name}
+                          key={p.key}
                           type="button"
                           onClick={() => applyPrompt(p.prompt)}
                           title={p.prompt}
@@ -581,10 +593,10 @@ export function PhotoEditor() {
             ) : (
               <div className="space-y-3">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
-                  Pokračovat s...
+                  {dict.prompt.sectionContinue}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {FOLLOWUP_PROMPTS.map((s) => (
+                  {dict.presets.followups.map((s) => (
                     <button
                       key={s}
                       type="button"
@@ -602,9 +614,9 @@ export function PhotoEditor() {
               <span className="text-xs text-(--color-ink-faint)">
                 {currentFile
                   ? iteration === 1
-                    ? "Připraveno"
-                    : `Pracuje se s krokem ${iteration}`
-                  : "Nejdřív nahraj fotku"}
+                    ? dict.prompt.statusReady
+                    : tFormat(dict.prompt.statusStep, { n: iteration })
+                  : dict.prompt.statusNoFile}
               </span>
               <button
                 type="button"
@@ -614,12 +626,14 @@ export function PhotoEditor() {
               >
                 {status === "submitting" ? (
                   <>
-                    <span className="animate-pulse-soft">Pracuje se</span>
+                    <span className="animate-pulse-soft">
+                      {dict.prompt.submitting}
+                    </span>
                     <Dots />
                   </>
                 ) : (
                   <>
-                    <span>Odeslat</span>
+                    <span>{dict.prompt.submit}</span>
                     <span className="hidden text-(--color-bg)/60 group-disabled:text-(--color-ink-faint) sm:inline">
                       ⌘↵
                     </span>
@@ -636,7 +650,9 @@ export function PhotoEditor() {
           role="alert"
           className="mt-6 flex items-start gap-3 rounded-sm border border-(--color-danger)/40 bg-(--color-danger)/10 px-4 py-3 text-sm text-(--color-danger) animate-fade-up"
         >
-          <span className="font-(family-name:--font-display) italic">Hm.</span>
+          <span className="font-(family-name:--font-display) italic">
+            {dict.prompt.error}
+          </span>
           <span>{errorMsg}</span>
         </div>
       )}
@@ -648,7 +664,9 @@ export function PhotoEditor() {
         >
           <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-baseline sm:justify-between">
             <h2 className="font-(family-name:--font-display) text-2xl italic sm:text-3xl">
-              {iteration === 1 ? "Hotovo." : `Krok ${iteration} hotov.`}
+              {iteration === 1
+                ? dict.result.headingFirst
+                : tFormat(dict.result.headingStep, { n: iteration })}
             </h2>
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <button
@@ -656,32 +674,36 @@ export function PhotoEditor() {
                 onClick={continueEditing}
                 className="rounded-sm bg-(--color-amber) px-3 py-2 text-xs font-medium uppercase tracking-wider text-(--color-bg) transition-colors hover:bg-(--color-amber-soft) sm:px-4"
               >
-                Uprav dál →
+                {dict.result.continueBtn}
               </button>
               <a
                 href={resultUrl}
                 download={`opravena-${originalFile?.name ?? "fotka"}`}
                 className="rounded-sm border border-(--color-line-strong) px-3 py-2 text-xs uppercase tracking-wider text-(--color-ink-dim) transition-colors hover:border-(--color-amber) hover:text-(--color-amber) sm:px-4"
               >
-                Stáhnout
+                {dict.result.download}
               </a>
               <button
                 type="button"
                 onClick={reset}
                 className="rounded-sm border border-(--color-line-strong) px-3 py-2 text-xs uppercase tracking-wider text-(--color-ink-dim) transition-colors hover:border-(--color-ink) hover:text-(--color-ink) sm:px-4"
               >
-                Od začátku
+                {dict.result.fromStart}
               </button>
             </div>
           </div>
 
-          <BeforeAfterSlider beforeUrl={currentUrl} afterUrl={resultUrl} />
+          <BeforeAfterSlider
+            beforeUrl={currentUrl}
+            afterUrl={resultUrl}
+            beforeLabel={dict.result.beforeLabel}
+            afterLabel={dict.result.afterLabel}
+          />
 
           <p className="mt-3 text-center text-[10px] text-(--color-ink-faint) sm:text-xs">
-            <span className="sm:hidden">Táhni za kolečko pro porovnání.</span>
+            <span className="sm:hidden">{dict.result.sliderHintMobile}</span>
             <span className="hidden sm:inline">
-              Táhni za kolečko nebo klikni kamkoli pro porovnání. Klávesy ← →
-              posouvají po 5 %, se Shift po 1 %.
+              {dict.result.sliderHintDesktop}
             </span>
           </p>
         </section>
