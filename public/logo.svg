@@ -1,10 +1,6 @@
-<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-  <rect width="120" height="120" rx="24" fill="#000"/>
-  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
-        font-family="Arial, sans-serif"
-        font-size="48"
-        fill="#fff"
-        font-weight="bold">
-    OF
-  </text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>opravfotku</title>
+  <path d="M 9 6 Q 4 16 9 26" fill="none" stroke="#f3ead6" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M 23 6 Q 28 16 23 26" fill="none" stroke="#f3ead6" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="16" cy="16" r="2.6" fill="#d97757"/>
 </svg>

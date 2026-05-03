@@ -22,7 +22,10 @@ export const metadata: Metadata = {
   },
   description: "Uprav fotku pomocí jednoho promptu. Bez vrstev, bez pravítek.",
   icons: {
-    icon: "/logo.svg",
+    icon: [
+      { url: "/logo-amber.svg", type: "image/svg+xml" },
+    ],
+    apple: { url: "/logo-amber.svg" },
   },
   openGraph: {
     title: "Oprav fotku",
