@@ -133,7 +133,7 @@ function renderInline(text: string): React.ReactNode[] {
       const inner = seg.slice(2, -2);
       if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inner)) {
         parts.push(
-          <a
+          <a          
             key={i}
             href={`mailto:${inner}`}
             className="text-(--color-amber) underline-offset-4 hover:underline"

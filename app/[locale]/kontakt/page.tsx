@@ -46,8 +46,10 @@ export default async function KontaktPage({
       </header>
 
       <section className="grid gap-3">
-        <a
-          href="mailto:info@opravfotku.cz"
+        
+          <a
+        
+            href="mailto:info@opravfotku.cz"
           className="group rounded-(--radius-card) border border-(--color-line) bg-(--color-surface) p-5 transition-colors hover:border-(--color-amber) sm:p-6"
         >
           <div className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
