@@ -112,6 +112,91 @@ export const cs = {
     motto: "Made with intent, not with templates.",
     languageLabel: "Jazyk",
   },
+  kontakt: {
+    title: "Kontakt",
+    titleAccent: "Kontakt.",
+    backToEditor: "← editor",
+    description:
+      "Dotazy, technické problémy, návrhy, hlášení chyb. Napiš na e-mail.",
+    metaDescription:
+      "Dotazy ke službě opravfotku, technické dotazy, ochrana osobních údajů.",
+    emailLabel: "E-mail",
+    responseLabel: "Odezva",
+    responseText:
+      "Tohle je osobní projekt, ne komerční služba. Odpovídám zpravidla do několika dní.",
+    bugLabel: "Něco nefunguje?",
+    bugText:
+      "Pošli prosím popis problému, použitý prompt, a ideálně screenshot chybové hlášky. Pomůže to s rychlejší diagnostikou.",
+  },
+  privacy: {
+    title: "Ochrana",
+    titleAccent: "osobních údajů.",
+    backToEditor: "← editor",
+    description:
+      "Co se děje s fotkou, kterou nahraješ. Stručně, bez právnické vaty.",
+    metaDescription:
+      "Jak nakládáme s nahranými fotografiemi a osobními údaji ve službě opravfotku.",
+    sections: {
+      whatHappens: {
+        heading: "Co se ti při nahrání fotky stane",
+        body: [
+          "Nahraná fotografie odejde z prohlížeče na server této služby (běžící na Vercelu) a odtud k AI poskytovateli Replicate, který spustí model FLUX.1 Kontext Pro a vrátí upravenou verzi. Výsledek se ti zobrazí v prohlížeči.",
+          "Fotky se na serveru opravfotku **neukládají**. Server je stateless a po vrácení výsledku data zahodí.",
+        ],
+      },
+      thirdParties: {
+        heading: "Třetí strany",
+        intro: "Pro fungování služby se používají tyto třetí strany:",
+        items: [
+          {
+            name: "Replicate Inc. (USA)",
+            detail:
+              "Spouští AI model na fotografii. Replicate podle své politiky uchovává vstupní a výstupní obrázky po dobu 1 hodiny pro ladění a poté je maže. Více: replicate.com/privacy",
+          },
+          {
+            name: "Vercel Inc. (USA)",
+            detail:
+              "Hostuje aplikaci a obsluhuje požadavky. Vercel zpracovává jen technické údaje (IP adresa pro rate limiting, request logy). Více: vercel.com/legal/privacy-policy",
+          },
+          {
+            name: "Black Forest Labs",
+            detail:
+              "Tvůrce modelu FLUX.1 Kontext Pro, který vlastní úpravu provádí. Model běží v prostředí Replicate, ne přímo na infrastruktuře BFL.",
+          },
+        ],
+        outro:
+          "Předání mimo EU (USA): služba zpracovává data ve Spojených státech. Replicate i Vercel deklarují soulad s mechanismy přenosu dat podle GDPR.",
+      },
+      browserStorage: {
+        heading: "Co se ukládá v tvém prohlížeči",
+        body: [
+          "Aplikace si lokálně v prohlížeči (přes IndexedDB) uchovává **posledních 5 upravených fotek**, abys je mohl rychle zobrazit zpátky. Tahle data **neopouští tvé zařízení** a nemá k nim přístup nikdo včetně provozovatele.",
+          "Smazat je můžeš tlačítkem „Smazat vše“ v liště historie, nebo vymazáním dat stránky v nastavení prohlížeče.",
+        ],
+      },
+      rateLimit: {
+        heading: "Rate limiting a IP adresa",
+        body: [
+          "Aplikace si dočasně pamatuje tvou IP adresu, aby jeden uživatel nemohl vyčerpat veškeré výpočetní zdroje. Limit je 10 úprav za hodinu a 30 za den. IP se drží jen v paměti běžícího serveru, neukládá se trvale, a po čase (max 24 h) se sama maže.",
+        ],
+      },
+      rights: {
+        heading: "Tvá práva",
+        body: [
+          "Jako subjekt údajů máš podle GDPR právo na přístup k údajům, opravu, výmaz, omezení zpracování, námitku a přenositelnost. Vzhledem k tomu, že provozovatel sám žádné fotografie ani identifikační údaje neukládá, prakticky se uplatní hlavně v komunikaci s Replicate a Vercel jako zpracovateli.",
+          "Otázky a žádosti směřuj na **info@opravfotku.cz**.",
+        ],
+      },
+      whatsNotHere: {
+        heading: "Co tu není",
+        body: [
+          "Žádné cookies pro reklamu ani analytiku. Žádné tracking pixely. Žádné sdílení dat s reklamními sítěmi. Žádné účty, žádná hesla.",
+        ],
+      },
+    },
+    footer:
+      "Tento text popisuje aktuální technické řešení služby. Pokud najdeš něco co nesedí s tvým očekáváním nebo s realitou, napiš na **info@opravfotku.cz**.",
+  },
 };
 
 export type Dict = typeof cs;
