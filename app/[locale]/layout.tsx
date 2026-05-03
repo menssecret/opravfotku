@@ -85,6 +85,7 @@ export default async function LocaleLayout({
     <html
       lang={LOCALE_HTML_LANG[typedLocale]}
       className={`${geist.variable} ${instrument.variable}`}
+      data-scroll-behavior="smooth"
     >
       <body className="antialiased relative z-0 flex min-h-screen flex-col">
         <div className="flex-1">{children}</div>
