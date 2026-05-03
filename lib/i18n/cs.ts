@@ -112,6 +112,6 @@ export const cs = {
     motto: "Made with intent, not with templates.",
     languageLabel: "Jazyk",
   },
-} as const;
+};
 
 export type Dict = typeof cs;

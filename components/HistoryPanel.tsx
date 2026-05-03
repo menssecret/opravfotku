@@ -2,16 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { formatRelativeTime, type HistoryEntry } from "@/lib/history";
+import type { Locale } from "@/lib/i18n/config";
+import { tFormat, type Dict } from "@/lib/i18n/dictionaries";
 
 type Props = {
   entries: HistoryEntry[];
   onSelect: (entry: HistoryEntry) => void;
   onRemove: (id: string) => void;
   onClear: () => void;
+  dict: Dict;
+  locale: Locale;
 };
 
-export function HistoryPanel({ entries, onSelect, onRemove, onClear }: Props) {
-  // Klient-only relative time, aby byl SSR/hydration konzistentní
+export function HistoryPanel({
+  entries,
+  onSelect,
+  onRemove,
+  onClear,
+  dict,
+}: Props) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30000);
@@ -20,21 +29,21 @@ export function HistoryPanel({ entries, onSelect, onRemove, onClear }: Props) {
 
   if (entries.length === 0) return null;
 
+  const word =
+    entries.length === 1 ? dict.history.countOne : dict.history.countMany;
+
   return (
-    <section
-      className="mb-10 animate-fade-up"
-      aria-label="Historie posledních úprav"
-    >
+    <section className="mb-10 animate-fade-up" aria-label="History">
       <div className="mb-3 flex items-baseline justify-between">
         <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
-          Posledních {entries.length} {entries.length === 1 ? "úprava" : "úprav"}
+          {tFormat(dict.history.label, { n: entries.length, word })}
         </p>
         <button
           type="button"
           onClick={onClear}
           className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint) transition-colors hover:text-(--color-danger)"
         >
-          Smazat vše
+          {dict.history.clearAll}
         </button>
       </div>
 
@@ -64,7 +73,7 @@ export function HistoryPanel({ entries, onSelect, onRemove, onClear }: Props) {
                   {entry.prompt}
                 </p>
                 <p className="mt-1 text-[10px] text-(--color-ink-faint)">
-                  {formatRelativeTime(entry.timestamp, now)}
+                  {formatRelativeTime(entry.timestamp, dict.history.relTime, now)}
                 </p>
               </div>
             </button>
@@ -75,7 +84,7 @@ export function HistoryPanel({ entries, onSelect, onRemove, onClear }: Props) {
                 e.stopPropagation();
                 onRemove(entry.id);
               }}
-              aria-label="Smazat z historie"
+              aria-label={dict.history.removeOne}
               className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-(--color-line-strong) bg-(--color-bg)/80 text-(--color-ink-dim) opacity-0 backdrop-blur transition-all hover:border-(--color-danger) hover:text-(--color-danger) group-hover:opacity-100 focus-visible:opacity-100"
             >
               <svg
