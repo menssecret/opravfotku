@@ -9,6 +9,7 @@ import {
   type DragEvent,
   type KeyboardEvent,
 } from "react";
+import Image from "next/image";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import {
@@ -27,20 +28,12 @@ type StylePreset = {
   prompt: string;
 };
 
-// ──────────────────────────────────────────────────────────
-// Profesionální preset (top, full-width)
-// ──────────────────────────────────────────────────────────
-
 const PORTRAIT_PRESET: StylePreset = {
   name: "Profesionální portrét",
   desc: "editorial úprava: světlo, pleť, oči, pozadí",
   prompt:
     "Transform this portrait into a professional editorial photograph. Recover blown-out highlights in the bright background (window) while preserving a natural daylight feel. Balance exposure so the face is properly lit with subtle directional light and gentle shadowing for added depth. Refine skin tones to look natural and slightly warm but not washed out. Add subtle contrast and texture so the face has dimension, but preserve realistic skin texture without over-smoothing. Enhance the eyes: sharpen them slightly, add gentle catchlights, and improve micro-contrast around the eyes and brows so the gaze feels more alive. Improve overall sharpness and detail while keeping a soft, professional portrait look. Reduce the distracting background by slightly blurring and softening it so the face stands out, and tone down any bright vertical stripes in the background. Apply a clean, minimalist color grading in the style of magazine photography with balanced highlights, rich midtones, and gentle shadows. Do not change the composition, expression, or facial features.",
 };
-
-// ──────────────────────────────────────────────────────────
-// Specializované situace (6 nových presetů)
-// ──────────────────────────────────────────────────────────
 
 const SITUATION_PRESETS: StylePreset[] = [
   {
@@ -80,10 +73,6 @@ const SITUATION_PRESETS: StylePreset[] = [
       "Transform this food photograph into an appetizing, restaurant-quality image. Enhance the natural colors of the ingredients: make greens fresher, reds richer, yellows warmer, but keep everything looking real and edible (no artificial saturation). Improve texture and sharpness of the food so details like steam, oil sheen, and grain structure are visible. Add subtle warm lighting that makes the food feel inviting. Slightly soften the background and surrounding elements to make the food the clear focal point. Enhance contrast so the food has dimension. Maintain natural shadows and highlights that suggest dimension and freshness. Do not change the food itself, its arrangement, or the composition.",
   },
 ];
-
-// ──────────────────────────────────────────────────────────
-// Stylové úpravy (filtry, stávající)
-// ──────────────────────────────────────────────────────────
 
 const STYLE_PRESETS: StylePreset[] = [
   {
@@ -337,9 +326,18 @@ export function PhotoEditor() {
   return (
     <main className="relative z-10 mx-auto max-w-6xl px-6 pt-16 pb-24 sm:px-10 sm:pt-20 lg:px-16">
       <header className="mb-14 sm:mb-20">
-        <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.32em] text-(--color-amber) animate-fade-up">
-          <span className="inline-block h-px w-10 bg-(--color-amber)" />
-          <span>opravfotku · v0.1</span>
+        <div className="flex items-center gap-3 animate-fade-up">
+          <Image
+            src="/logo.svg"
+            alt="opravfotku"
+            width={28}
+            height={28}
+            priority
+            className="opacity-90"
+          />
+          <span className="text-[11px] uppercase tracking-[0.32em] text-(--color-amber)">
+            opravfotku
+          </span>
         </div>
         <h1
           className="mt-7 font-(family-name:--font-display) text-5xl leading-[0.95] tracking-tight text-balance sm:text-7xl lg:text-8xl animate-fade-up"
@@ -472,7 +470,6 @@ export function PhotoEditor() {
 
             {iteration === 1 ? (
               <div className="space-y-5">
-                {/* Profesionální preset (full-width) */}
                 <div className="space-y-2">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
                     Profesionální
@@ -507,7 +504,6 @@ export function PhotoEditor() {
                   </button>
                 </div>
 
-                {/* Specializované situace */}
                 <div className="space-y-2">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
                     Pro situaci
@@ -545,7 +541,6 @@ export function PhotoEditor() {
                   </div>
                 </div>
 
-                {/* Stylové úpravy / filtry */}
                 <div className="space-y-2">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-(--color-ink-faint)">
                     Stylové úpravy
