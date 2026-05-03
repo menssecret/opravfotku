@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Instrument_Serif } from "next/font/google";
-import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
 
 const geist = Geist({
@@ -16,21 +15,9 @@ const instrument = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Oprav fotku",
-    template: "%s · Oprav fotku",
-  },
-  description: "Uprav fotku pomocí jednoho promptu. Bez vrstev, bez pravítek.",
   icons: {
     icon: [{ url: "/logo-amber.svg", type: "image/svg+xml" }],
     apple: { url: "/logo-amber.svg" },
-  },
-  openGraph: {
-    title: "Oprav fotku",
-    description:
-      "Uprav fotku pomocí jednoho promptu. Bez vrstev, bez pravítek.",
-    type: "website",
-    locale: "cs_CZ",
   },
   appleWebApp: {
     capable: true,
@@ -51,10 +38,9 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="cs" className={`${geist.variable} ${instrument.variable}`}>
+    <html className={`${geist.variable} ${instrument.variable}`}>
       <body className="antialiased relative z-0 flex min-h-screen flex-col">
-        <div className="flex-1">{children}</div>
-        <SiteFooter />
+        {children}
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
-import { PhotoEditor } from "@/components/PhotoEditor";
+import { redirect } from "next/navigation";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 
-export default function HomePage() {
-  return <PhotoEditor />;
+export default function Root() {
+  redirect(`/${DEFAULT_LOCALE}`);
 }
